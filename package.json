@@ -1,7 +1,16 @@
 {
-  "name": "web",
+  "name": "@air-land-and-sea/web",
   "version": "0.1.0",
-  "private": true,
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/keriwarr/air-land-and-sea-web.git"
+  },
+  "author": "Keri Warr",
+  "bugs": {
+    "url": "https://github.com/keriwarr/air-land-and-sea-web/issues"
+  },
+  "homepage": "https://github.com/keriwarr/air-land-and-sea-web#readme",
+  "license": "MIT",
   "dependencies": {
     "@testing-library/jest-dom": "^4.2.4",
     "@testing-library/react": "^9.3.2",
