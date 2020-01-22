@@ -12,6 +12,7 @@
   "homepage": "https://github.com/keriwarr/air-land-and-sea-web#readme",
   "license": "MIT",
   "dependencies": {
+    "@air-land-and-sea/engine": "file:../engine",
     "@testing-library/jest-dom": "^4.2.4",
     "@testing-library/react": "^9.3.2",
     "@testing-library/user-event": "^7.1.2",
@@ -20,9 +21,14 @@
     "@types/react": "^16.9.0",
     "@types/react-dom": "^16.9.0",
     "air-land-and-sea-engine": "file:../engine",
+    "mobx": "^5.15.2",
+    "mobx-react": "^6.1.5",
     "react": "^16.12.0",
+    "react-dnd": "^10.0.2",
+    "react-dnd-html5-backend": "^10.0.2",
     "react-dom": "^16.12.0",
     "react-scripts": "3.3.0",
+    "styled-components": "^5.0.0",
     "typescript": "~3.7.2"
   },
   "scripts": {
@@ -47,6 +53,7 @@
     ]
   },
   "devDependencies": {
+    "@types/styled-components": "^4.4.2",
     "prettier": "^1.19.1"
   }
 }

@@ -1,25 +1,27 @@
-import React from "react";
+import React, { useState } from "react";
+import { observer } from "mobx-react";
 import "./App.css";
-import Card from "components/Card";
-import { Deck } from "air-land-and-sea-engine";
-import Wind from "icons/Wind";
-import Land from "icons/Land";
-import Wave from "icons/Wave";
-import Plane from "icons/Plane";
-import Tank from "icons/Tank";
-import Ship from "icons/Ship";
-import Propellor from "icons/Propellor";
-import Knife from "icons/Knife";
-import Anchor from "icons/Anchor";
-import Pilot from "icons/Pilot";
-import Grunt from "icons/Grunt";
-import Captain from "icons/Captain";
+// import Card from "components/Card";
+import { RoundState, THEATER } from "air-land-and-sea-engine";
+import Hand from "components/Hand";
+import styled from "styled-components";
 
-const App: React.FC = () => {
-  const deck = Deck.getStandard();
+const HandContainer = styled.div`
+  position: fixed;
+  top: 700px;
+`;
+
+const App: React.FC = observer(() => {
+  const [roundState] = useState(
+    () => new RoundState([THEATER.AIR, THEATER.LAND, THEATER.SEA])
+  );
+  // const deck = Deck.getStandard();
   return (
     <div className="App">
-      <div className="VerticalCardList">
+      <HandContainer>
+        <Hand cards={roundState.currentHandP1} />
+      </HandContainer>
+      {/* <div className="VerticalCardList">
         {deck.cards.map(card => (
           <Card
             card={card}
@@ -65,9 +67,9 @@ const App: React.FC = () => {
             Icons={{ AIR: Pilot, LAND: Grunt, SEA: Captain }}
           />
         ))}
-      </div>
+      </div> */}
     </div>
   );
-};
+});
 
 export default App;
