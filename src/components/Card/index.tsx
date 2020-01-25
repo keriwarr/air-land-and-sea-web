@@ -12,6 +12,7 @@ interface ICardProps {
   };
   flipped: boolean;
   onClick?: () => void;
+  inHand?: boolean;
 }
 
 const CardContainer = styled.div`
@@ -85,7 +86,7 @@ const CardArt = styled.div<{ flipped: boolean }>`
   background-color: ${props => (props.flipped ? CARD_BACK_COLOR : "white")};
 `;
 
-const Card: React.FC<ICardProps> = ({ card, Icons, flipped, onClick }) => {
+const Card: React.FC<ICardProps> = ({ card, Icons, flipped, onClick, inHand }) => {
   const Icon = Icons[card.theater];
   return (
     <CardContainer onClick={onClick}>
@@ -99,7 +100,9 @@ const Card: React.FC<ICardProps> = ({ card, Icons, flipped, onClick }) => {
         )}
       </CardHeader>
       <CardArt flipped={flipped}>
-        <Icon width="50%" height="50%" fill={THEATER_COLOR[card.theater]} />
+        {(!flipped || inHand) && (
+          <Icon width="50%" height="50%" fill={THEATER_COLOR[card.theater]} />
+        )}
       </CardArt>
     </CardContainer>
   );

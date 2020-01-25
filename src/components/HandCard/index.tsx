@@ -135,6 +135,7 @@ const HandCard: React.FC<IHandCardProps> = ({
           Icons={{ AIR: Wind, LAND: Land, SEA: Wave }}
           flipped={cardShowingFace === "back"}
           onClick={onClick}
+          inHand
         />
       </CardFlipper>
       {selected && (
