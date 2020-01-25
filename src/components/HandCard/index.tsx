@@ -38,6 +38,7 @@ const CardFlipper = styled.div<{ flipped: "initial" | "faceUp" | "faceDown" }>`
       : props.flipped === "faceDown"
       ? "animation: flipFirstHalf-2 0.15s ease-in 0s, flipSecondHald-2 0.15s ease-out 0.15s;"
       : ""}
+
   @keyframes flipFirstHalf-1 {
     0% {
       transform: rotateY(0deg);
@@ -108,7 +109,13 @@ const HandCard: React.FC<IHandCardProps> = ({
     "front"
   );
 
+  if (!selected && flipped === "faceDown") {
+    setFlipped("faceUp");
+  }
+
   // TODO - listen to animation events instead of using timeout
+  // I think this might be an issue if it runs twice in a row due to the above
+  // state update
   useEffect(() => {
     setTimeout(() => {
       if (!selected || flipped === "faceUp") {
@@ -121,20 +128,13 @@ const HandCard: React.FC<IHandCardProps> = ({
 
   return (
     <CardPositioner key={card.id} position={position} selected={selected}>
-      <CardFlipper flipped={selected ? flipped : 'faceUp'}>
+      <CardFlipper flipped={flipped}>
         <Card
           card={card}
           // TODO - theming?
           Icons={{ AIR: Wind, LAND: Land, SEA: Wave }}
           flipped={cardShowingFace === "back"}
-          onClick={() => {
-            if (flipped === "faceDown") {
-              setFlipped("faceUp");
-            }
-            if (onClick) {
-              onClick();
-            }
-          }}
+          onClick={onClick}
         />
       </CardFlipper>
       {selected && (
