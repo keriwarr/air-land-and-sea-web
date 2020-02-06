@@ -20,10 +20,26 @@ export default class AuthStore {
     return this.user && this.user.email;
   }
 
+  public displayName(this: AuthStore & { user: firebase.User }): string;
+  // @computed
+  public displayName(this: AuthStore): string | null {
+    return this.user && (this.user.displayName || '');
+  }
+
   @action
   private readonly setUser = (user: firebase.User | null) => {
     this.user = user;
   };
+
+  public setDisplayName(displayName: string) {
+    if (!this.user) {
+      return Promise.resolve();
+    }
+
+    return this.user.updateProfile({
+      displayName
+    });
+  }
 
   private readonly initiateFirebaseListener = () => {
     firebase.auth().onAuthStateChanged(this.setUser);
