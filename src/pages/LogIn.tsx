@@ -13,14 +13,14 @@ const Container = styled.div`
   align-items: center;
 `;
 
-const SignUp: React.FC = () => {
+const LogIn: React.FC = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const history = useHistory();
 
   const handleSubmit = async () => {
     try {
-      await firebase.auth().createUserWithEmailAndPassword(email, password);
+      await firebase.auth().signInWithEmailAndPassword(email, password);
 
       history.push('/')
     } catch(e) {
@@ -47,4 +47,4 @@ const SignUp: React.FC = () => {
   );
 };
 
-export default SignUp;
+export default LogIn;
