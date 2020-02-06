@@ -9,7 +9,6 @@
   "bugs": {
     "url": "https://github.com/keriwarr/air-land-and-sea-web/issues"
   },
-  "homepage": "https://github.com/keriwarr/air-land-and-sea-web#readme",
   "license": "MIT",
   "dependencies": {
     "@air-land-and-sea/engine": "file:../engine",
