@@ -3,6 +3,20 @@ import ReactDOM from 'react-dom';
 import './index.css';
 import App from './App';
 import * as serviceWorker from './serviceWorker';
+import firebase from 'firebase';
+
+const firebaseConfig = {
+  apiKey: "AIzaSyC7m_bz-F5YA-nNum3DqthObUfiULC9Q0o",
+  authDomain: "air-land-and-sea.firebaseapp.com",
+  databaseURL: "https://air-land-and-sea.firebaseio.com",
+  projectId: "air-land-and-sea",
+  storageBucket: "air-land-and-sea.appspot.com",
+  messagingSenderId: "800470198593",
+  appId: "1:800470198593:web:6e5bd9c1eac5c5b9b059c0",
+  measurementId: "G-9GXCXRHMFY"
+};
+
+firebase.initializeApp(firebaseConfig);
 
 ReactDOM.render(<App />, document.getElementById('root'));
 
