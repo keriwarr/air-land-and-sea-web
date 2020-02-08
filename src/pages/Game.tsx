@@ -6,7 +6,13 @@ import { observable, action, computed, reaction } from "mobx";
 import AuthStore from "stores/auth";
 import { useAuthStore } from "utils/useAuthStore";
 import { isNotNull } from "utils/types";
-import { RoundState, THEATER, PLAYER, Deck, DECISION_TYPE } from "air-land-and-sea-engine";
+import {
+  RoundState,
+  THEATER,
+  PLAYER,
+  Deck,
+  DECISION_TYPE
+} from "air-land-and-sea-engine";
 import styled from "styled-components";
 import PlayingField from "components/PlayingFIeld";
 import Hand from "components/Hand";
@@ -92,6 +98,15 @@ const HandContainer = styled.div`
 const NotificationContainer = styled.div`
   position: fixed;
   top: 50px;
+
+  display: flex;
+  flex-direction: row;
+`;
+
+const Column = styled.div`
+  display: flex;
+  flex-direction: column;
+  margin-right: 20px;
 `;
 
 const Game: React.FC = observer(() => {
@@ -335,6 +350,34 @@ const Game: React.FC = observer(() => {
     pushGameState();
   };
 
+  const handleOptOut = () => {
+    if (!isMyTurn) {
+      throw new Error("shouldnt have happened");
+    }
+
+    if (anticipatedDecision === null) {
+      throw new Error("shouldnt have happened");
+    }
+
+    if (anticipatedDecision.type === DECISION_TYPE.REINFORCE_DECISION) {
+      roundState.playReinforceDecision({
+        made: null
+      });
+      pushGameState();
+      return;
+    }
+
+    if (anticipatedDecision.type === DECISION_TYPE.TRANSPORT_DECISION) {
+      roundState.playTransportDecision({
+        made: null
+      });
+      pushGameState();
+      return;
+    }
+
+    throw new Error("shouldnt have happened");
+  };
+
   const playingFieldAnticipation = (() => {
     if (!isMyTurn) {
       return null;
@@ -374,21 +417,69 @@ const Game: React.FC = observer(() => {
     throw new Error("What?");
   })();
 
+  const canOptOut = (() => {
+    if (!isMyTurn) {
+      return false;
+    }
+
+    if (anticipatedDecision === null) {
+      return false;
+    }
+
+    if (anticipatedDecision.type === DECISION_TYPE.REINFORCE_DECISION) {
+      return true;
+    }
+
+    if (anticipatedDecision.type === DECISION_TYPE.TRANSPORT_DECISION) {
+      return true;
+    }
+
+    return false;
+  })();
+
+  const canSurrender = (() => {
+    if (!isMyTurn) {
+      return false;
+    }
+
+    if (anticipatedDecision === null) {
+      return true;
+    }
+
+    return false;
+  })();
+
+  const handleSurrender = () => {
+    roundState.surrender();
+    pushGameState();
+  };
+
   return (
     <Container>
       <NotificationContainer>
-        <div>
-          You are playing against{" "}
-          {whoAmI === PLAYER.ONE
-            ? gameStore.playerTwoName
-            : gameStore.playerOneName}
-        </div>
-        <br />
-        <div>
-          {isMyTurn
-            ? "It's your turn!"
-            : "The other player is taking their turn."}
-        </div>
+        <Column>
+          <button disabled={canSurrender} onClick={handleSurrender}>
+            Surrender!
+          </button>
+          <br />
+          <button disabled={!canOptOut} onClick={handleOptOut}>
+            Opt Out
+          </button>
+        </Column>
+        <Column>
+          <div>
+            You are playing against{" "}
+            {whoAmI === PLAYER.ONE
+              ? gameStore.playerTwoName
+              : gameStore.playerOneName}
+          </div>
+          <br />
+          <div>
+            {isMyTurn
+              ? "It's your turn!"
+              : "The other player is taking their turn."}
+          </div>
+        </Column>
       </NotificationContainer>
       <PlayingFieldContainer>
         <PlayingField
