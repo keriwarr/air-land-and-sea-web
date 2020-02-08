@@ -3,7 +3,6 @@ import { BrowserRouter as Router, Switch, Route, Link } from "react-router-dom";
 import Home from "pages/Home";
 import SignUp from "pages/SignUp";
 import Login from "pages/LogIn";
-import PlayingFieldTest from "pages/PlayingFieldTest";
 import styled from "styled-components";
 import { useAuthStore } from "utils/useAuthStore";
 import LogoutButton from "components/LogoutButton";
@@ -63,9 +62,6 @@ const App: React.FC = observer(() => {
             </Route>
             <Route path="/login">
               <Login />
-            </Route>
-            <Route path="/demo">
-              <PlayingFieldTest />
             </Route>
             <Route path="/:gameId">
               <Game />
