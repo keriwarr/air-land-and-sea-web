@@ -16,10 +16,12 @@ const HandContainer = styled.div`
 `;
 
 const Hand: React.FC<IHandProps> = observer(({ cards, onSelectionChanged }) => {
-  const [selectedCardIndex, setSelectedCard] = useState<number | null>(null);
+  const [selectedCardIndex, setSelectedCardIndex] = useState<number | null>(
+    null
+  );
 
   useEffect(() => {
-    setSelectedCard(null);
+    setSelectedCardIndex(null);
   }, [cards]);
 
   return (
@@ -31,13 +33,13 @@ const Hand: React.FC<IHandProps> = observer(({ cards, onSelectionChanged }) => {
             position={index - (cards.length - 1) / 2}
             selected={selectedCardIndex === index}
             card={card}
-            // TODO - how to avoid inline arrow fns with react hooks?
             onClick={() => {
               const selection = selectedCardIndex === index ? null : index;
-              setSelectedCard(selection);
-              onSelectionChanged(
-                selection === null ? null : cards[selection].id
-              );
+              const selectedCardId =
+                selection === null ? null : cards[selection].id;
+
+              setSelectedCardIndex(selection);
+              onSelectionChanged(selectedCardId);
             }}
           />
         ))}
