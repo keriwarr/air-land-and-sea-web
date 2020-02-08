@@ -105,6 +105,15 @@ const Game: React.FC = observer(() => {
   const [selectedCard, setSelectedCard] = useState<number | null>(null);
   const [deckIsSet, setDeckIsSet] = useState(false);
 
+  if (!auth.isAuthentiated()) {
+    return null;
+  }
+
+  const gameDocRef = firebase
+    .firestore()
+    .collection("rounds")
+    .doc(gameId);
+
   useEffect(() => {
     setRoundState(new RoundState([THEATER.AIR, THEATER.LAND, THEATER.SEA]));
     setDeckIsSet(false);
@@ -161,14 +170,10 @@ const Game: React.FC = observer(() => {
   );
 
   useEffect(() => {
-    return firebase
-      .firestore()
-      .collection("rounds")
-      .doc(gameId)
-      .onSnapshot(function(doc) {
-        gameStore.setFromFirebase(doc.data() || {});
-      });
-  }, [gameId, gameStore]);
+    return gameDocRef.onSnapshot(doc => {
+      gameStore.setFromFirebase(doc.data() || {});
+    });
+  }, [gameDocRef, gameId, gameStore]);
 
   useEffect(() => {
     if (!gameStore.gameInitialized || !auth.isAuthentiated()) {
@@ -181,10 +186,7 @@ const Game: React.FC = observer(() => {
     }
 
     if (!gameStore.inGame) {
-      firebase
-        .firestore()
-        .collection("rounds")
-        .doc(gameId)
+      gameDocRef
         .set(
           {
             playerTwoUid: auth.uid(),
@@ -204,16 +206,13 @@ const Game: React.FC = observer(() => {
     gameStore.inGame,
     history,
     auth,
-    roundState
+    roundState,
+    gameDocRef
   ]);
 
   const handleCardSelectionChanged = useCallback((cardId: number | null) => {
     setSelectedCard(cardId);
   }, []);
-
-  if (!auth.isAuthentiated()) {
-    return null;
-  }
 
   if (!gameStore.gameInitialized) {
     return <div>Loading...</div>;
@@ -255,29 +254,28 @@ const Game: React.FC = observer(() => {
     });
     setSelectedCard(null);
 
-    firebase
-      .firestore()
-      .collection("rounds")
-      .doc(gameId)
-      .set(
-        {
-          roundState: JSON.stringify(roundState.toJSON())
-        },
-        { merge: true }
-      );
+    gameDocRef.set(
+      {
+        roundState: JSON.stringify(roundState.toJSON())
+      },
+      { merge: true }
+    );
   };
 
   return (
     <Container>
       <NotificationContainer>
         <div>
-          You are playing against {whoAmI === PLAYER.ONE ? gameStore.playerTwoName : gameStore.playerOneName}
+          You are playing against{" "}
+          {whoAmI === PLAYER.ONE
+            ? gameStore.playerTwoName
+            : gameStore.playerOneName}
         </div>
         <br />
         <div>
-        {isMyTurn
-          ? "It's your turn!"
-          : "The other player is taking their turn."}
+          {isMyTurn
+            ? "It's your turn!"
+            : "The other player is taking their turn."}
         </div>
       </NotificationContainer>
       <PlayingFieldContainer>
