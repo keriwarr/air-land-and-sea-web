@@ -274,7 +274,9 @@ const Game: React.FC = observer(() => {
   const hand =
     whoAmI === PLAYER.ONE ? roundState.currentHandP1 : roundState.currentHandP2;
 
-  const isMyTurn = whoAmI === roundState.activePlayer;
+  const roundIsComplete = roundState.complete;
+
+  const isMyTurn = whoAmI === roundState.activePlayer && !roundIsComplete;
 
   const { anticipatedDecision } = roundState;
 
@@ -438,11 +440,11 @@ const Game: React.FC = observer(() => {
   })();
 
   const canSurrender = (() => {
-    if (!isMyTurn) {
+    if (anticipatedDecision !== null) {
       return false;
     }
 
-    if (anticipatedDecision === null) {
+    if (isMyTurn) {
       return true;
     }
 
@@ -458,7 +460,7 @@ const Game: React.FC = observer(() => {
     <Container>
       <NotificationContainer>
         <Column>
-          <button disabled={canSurrender} onClick={handleSurrender}>
+          <button disabled={!canSurrender} onClick={handleSurrender}>
             Surrender!
           </button>
           <br />
@@ -475,7 +477,11 @@ const Game: React.FC = observer(() => {
           </div>
           <br />
           <div>
-            {isMyTurn
+            {roundState.victor !== null
+              ? roundState.victor === whoAmI
+                ? "You won that round :D"
+                : "You lost that round :'("
+              : isMyTurn
               ? "It's your turn!"
               : "The other player is taking their turn."}
           </div>
