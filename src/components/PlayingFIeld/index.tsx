@@ -91,6 +91,7 @@ interface IProps {
   whoAmI: PLAYER;
   onOwnTheaterSelected: (theater: THEATER) => void;
   onAnyTheaterSelected: (theater: THEATER, player: PLAYER) => void;
+  onOwnCardSelected: (theater: THEATER, indexFromTop: number) => void;
   anticipation:
     | "ownTheater"
     | "anyTheater"
@@ -112,6 +113,7 @@ const PlayingField: React.FC<IProps> = ({
   whoAmI,
   onOwnTheaterSelected,
   onAnyTheaterSelected,
+  onOwnCardSelected,
   anticipation
 }) => (
   <PlayingFieldContainer>
@@ -122,9 +124,13 @@ const PlayingField: React.FC<IProps> = ({
           const positionPlayer =
             position === POSITION.SELF ? whoAmI : getOtherPlayer(whoAmI);
           const theaterCards = boardState[theater][positionPlayer];
-          const selectable =
+          const theaterSelectable =
             anticipation === "anyTheater" ||
             (position === POSITION.SELF && anticipation === "ownTheater");
+          const isCardSelectable = (faceUp: boolean) =>
+            position === POSITION.SELF &&
+            (anticipation === "ownCard" ||
+              (anticipation === "ownFaceDownCard" && !faceUp));
 
           return (
             /* TODO select player using game state */
@@ -132,9 +138,9 @@ const PlayingField: React.FC<IProps> = ({
               opponent={position === POSITION.OPPONENT}
               key={`${theater}-${position}`}
               center={THEATERS[1] === theater}
-              selectable={selectable}
+              selectable={theaterSelectable}
               onClick={() => {
-                if (selectable) {
+                if (theaterSelectable) {
                   if (anticipation === "ownTheater") {
                     onOwnTheaterSelected(theater);
                   } else if (anticipation === "anyTheater") {
@@ -145,19 +151,35 @@ const PlayingField: React.FC<IProps> = ({
                 }
               }}
             >
-              {theaterCards.map(({ card, faceUp }, index) => (
-                <CardContainer
-                  key={card.id}
-                  index={theaterCards.length - index - 1}
-                >
-                  <Card
-                    card={card}
-                    // TODO - theming?
-                    Icons={Icons}
-                    flipped={!faceUp}
-                  />
-                </CardContainer>
-              ))}
+              {theaterCards.map(({ card, faceUp }, index) => {
+                const cardSelectable = isCardSelectable(faceUp);
+                return (
+                  <CardContainer
+                    key={card.id}
+                    index={theaterCards.length - index - 1}
+                  >
+                    <Card
+                      selectable={cardSelectable}
+                      onClick={() => {
+                        if (cardSelectable) {
+                          if (
+                            anticipation === "ownCard" ||
+                            anticipation === "ownFaceDownCard"
+                          ) {
+                            onOwnCardSelected(theater, index);
+                          } else {
+                            throw new Error("bar");
+                          }
+                        }
+                      }}
+                      card={card}
+                      // TODO - theming?
+                      Icons={Icons}
+                      flipped={!faceUp}
+                    />
+                  </CardContainer>
+                );
+              })}
             </PlayerTheater>
           );
         })

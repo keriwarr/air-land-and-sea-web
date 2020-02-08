@@ -352,6 +352,37 @@ const Game: React.FC = observer(() => {
     pushGameState();
   };
 
+  const handleOwnCardSelected = (theater: THEATER, indexFromTop: number) => {
+    if (!isMyTurn) {
+      throw new Error("shouldnt have happened");
+    }
+
+    if (anticipatedDecision === null) {
+      throw new Error("shouldnt have happened");
+    }
+
+    if (anticipatedDecision.type === DECISION_TYPE.REDEPLOY_DECISION) {
+      roundState.playRedeployDecision({
+        made: {
+          theater,
+          indexFromTop
+        }
+      });
+      pushGameState();
+      return;
+    }
+
+    if (anticipatedDecision.type === DECISION_TYPE.TRANSPORT_DECISION) {
+      setTransportOrigin({
+        theater,
+        indexFromTop
+      });
+      return;
+    }
+
+    throw new Error("shouldnt have happened");
+  };
+
   const handleOptOut = () => {
     if (!isMyTurn) {
       throw new Error("shouldnt have happened");
@@ -494,6 +525,7 @@ const Game: React.FC = observer(() => {
           whoAmI={whoAmI}
           onOwnTheaterSelected={handleOwnTheaterSelected}
           onAnyTheaterSelected={handleAnyTheaterSelected}
+          onOwnCardSelected={handleOwnCardSelected}
         />
       </PlayingFieldContainer>
       <HandContainer>

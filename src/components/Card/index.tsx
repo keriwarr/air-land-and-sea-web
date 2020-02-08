@@ -13,9 +13,10 @@ interface ICardProps {
   flipped: boolean;
   onClick?: () => void;
   inHand?: boolean;
+  selectable?: boolean;
 }
 
-const CardContainer = styled.div`
+const CardContainer = styled.div<{ selectable?: boolean }>`
   width: 2.25in;
   height: 3.11in;
   flex-shrink: 0;
@@ -25,7 +26,8 @@ const CardContainer = styled.div`
   flex-direction: column;
   overflow: hidden;
 
-  border: 3px solid black;
+  border: ${props =>
+    props.selectable ? "3px solid #aaddbb" : "3px solid black"};
   box-shadow: 0 0 9px 0 #444;
   transition: box-shadow 0.2s;
   margin-bottom: 10px;
@@ -35,6 +37,8 @@ const CardContainer = styled.div`
   }
 
   user-select: none;
+
+  ${props => (props.selectable ? "cursor: pointer" : "")};
 `;
 
 const CardHeader = styled.div<{ theater: THEATER; flipped: boolean }>`
@@ -86,10 +90,17 @@ const CardArt = styled.div<{ flipped: boolean }>`
   background-color: ${props => (props.flipped ? CARD_BACK_COLOR : "white")};
 `;
 
-const Card: React.FC<ICardProps> = ({ card, Icons, flipped, onClick, inHand }) => {
+const Card: React.FC<ICardProps> = ({
+  card,
+  Icons,
+  flipped,
+  onClick,
+  inHand,
+  selectable
+}) => {
   const Icon = Icons[card.theater];
   return (
-    <CardContainer onClick={onClick}>
+    <CardContainer onClick={onClick} selectable={selectable}>
       <CardHeader theater={card.theater} flipped={flipped}>
         <CardRank>{flipped ? 2 : card.rank}</CardRank>
         {!flipped && (
