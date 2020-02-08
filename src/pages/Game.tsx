@@ -1,0 +1,298 @@
+import React, { useEffect, useState, useCallback } from "react";
+import { observer } from "mobx-react";
+import { useParams, useHistory } from "react-router-dom";
+import * as firebase from "firebase";
+import { observable, action, computed, reaction } from "mobx";
+import AuthStore from "stores/auth";
+import { useAuthStore } from "utils/useAuthStore";
+import { isNotNull } from "utils/types";
+import { RoundState, THEATER, PLAYER, Deck } from "air-land-and-sea-engine";
+import styled from "styled-components";
+import PlayingField from "components/PlayingFIeld";
+import Hand from "components/Hand";
+
+class GameStore {
+  constructor(private auth: AuthStore) {}
+
+  @observable
+  playerOneUid?: string;
+
+  @observable
+  playerOneName?: string;
+
+  @observable
+  playerTwoUid?: string;
+
+  @observable
+  playerTwoName?: string;
+
+  @observable
+  roundState?: string;
+
+  @computed
+  get gameInitialized() {
+    return !!this.playerOneUid;
+  }
+
+  @computed
+  get inGame() {
+    return (
+      this.auth.isAuthentiated() &&
+      (this.auth.uid() === this.playerOneUid ||
+        this.auth.uid() === this.playerTwoUid)
+    );
+  }
+
+  @computed
+  get gameFull() {
+    return !!this.playerOneUid && !!this.playerTwoUid;
+  }
+
+  @action
+  public readonly reset = () => {
+    this.playerTwoUid = undefined;
+    this.playerTwoName = undefined;
+    this.roundState = undefined;
+  };
+
+  @action
+  public readonly setFromFirebase = (data: firebase.firestore.DocumentData) => {
+    // TODO - make sure they're strings?
+    this.playerOneUid = data["playerOneUid"];
+    this.playerOneName = data["playerOneName"];
+    this.playerTwoUid = data["playerTwoUid"];
+    this.playerTwoName = data["playerTwoName"];
+    this.roundState = data["roundState"];
+  };
+}
+
+const Container = styled.div`
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+`;
+
+const PlayingFieldContainer = styled.div`
+  position: fixed;
+  top: 100px;
+  height: 400px;
+  width: 600px;
+  transform: scale(0.7);
+`;
+
+const HandContainer = styled.div`
+  position: fixed;
+  top: 550px;
+  transform: scale(0.7);
+  transform-origin: top center;
+`;
+
+const NotificationContainer = styled.div`
+  position: fixed;
+  top: 50px;
+`;
+
+const Game: React.FC = observer(() => {
+  const { gameId } = useParams();
+  const auth = useAuthStore();
+  const [gameStore] = useState(new GameStore(auth));
+  const history = useHistory();
+  const [roundState, setRoundState] = useState(
+    () => new RoundState([THEATER.AIR, THEATER.LAND, THEATER.SEA])
+  );
+  const [selectedCard, setSelectedCard] = useState<number | null>(null);
+  const [deckIsSet, setDeckIsSet] = useState(false);
+
+  useEffect(() => {
+    setRoundState(new RoundState([THEATER.AIR, THEATER.LAND, THEATER.SEA]));
+    setDeckIsSet(false);
+    setSelectedCard(null);
+    gameStore.reset();
+  }, [gameId, gameStore]);
+
+  useEffect(() =>
+    reaction(
+      () => gameStore.roundState,
+      roundStateString => {
+        if (!roundStateString) {
+          return;
+        }
+
+        try {
+          const roundStateObj: {
+            deck: ReturnType<RoundState["toJSON"]>["deck"];
+            moves: ReturnType<RoundState["toJSON"]>["moves"];
+          } = JSON.parse(roundStateString);
+          const { deck, moves } = roundStateObj;
+
+          if (!deckIsSet) {
+            setRoundState(
+              new RoundState(
+                [THEATER.AIR, THEATER.LAND, THEATER.SEA],
+                {},
+                new Deck(
+                  deck.map(({ cardTypeKey, theater, name, id }) => ({
+                    cardTypeKey,
+                    theater,
+                    name,
+                    id
+                  })),
+                  false
+                )
+              )
+            );
+            setDeckIsSet(true);
+          }
+          if (moves.length > roundState.numMoves) {
+            moves
+              .slice(roundState.numMoves)
+              .filter(isNotNull)
+              .forEach(move => {
+                roundState.playMove(move);
+              });
+          }
+        } catch (e) {
+          console.error(e);
+        }
+      }
+    )
+  );
+
+  useEffect(() => {
+    return firebase
+      .firestore()
+      .collection("rounds")
+      .doc(gameId)
+      .onSnapshot(function(doc) {
+        gameStore.setFromFirebase(doc.data() || {});
+      });
+  }, [gameId, gameStore]);
+
+  useEffect(() => {
+    if (!gameStore.gameInitialized || !auth.isAuthentiated()) {
+      return;
+    }
+
+    if (gameStore.gameFull && !gameStore.inGame) {
+      history.push("/");
+      return;
+    }
+
+    if (!gameStore.inGame) {
+      firebase
+        .firestore()
+        .collection("rounds")
+        .doc(gameId)
+        .set(
+          {
+            playerTwoUid: auth.uid(),
+            playerTwoName: auth.displayName(),
+            roundState: JSON.stringify(roundState.toJSON())
+          },
+          { merge: true }
+        )
+        .then(() => {
+          setDeckIsSet(true);
+        });
+    }
+  }, [
+    gameId,
+    gameStore.gameInitialized,
+    gameStore.gameFull,
+    gameStore.inGame,
+    history,
+    auth,
+    roundState
+  ]);
+
+  const handleCardSelectionChanged = useCallback((cardId: number | null) => {
+    setSelectedCard(cardId);
+  }, []);
+
+  if (!auth.isAuthentiated()) {
+    return null;
+  }
+
+  if (!gameStore.gameInitialized) {
+    return <div>Loading...</div>;
+  }
+
+  if (!gameStore.gameFull) {
+    return (
+      <div>
+        Waiting for another player to join. Share your URL with a friend or an
+        enemy.
+      </div>
+    );
+  }
+
+  const whoAmI = (() => {
+    if (gameStore.playerOneUid === auth.uid()) {
+      return PLAYER.ONE;
+    }
+    if (gameStore.playerTwoUid === auth.uid()) {
+      return PLAYER.TWO;
+    }
+    throw new Error("Why didn't it redirect?");
+  })();
+
+  const hand =
+    whoAmI === PLAYER.ONE ? roundState.currentHandP1 : roundState.currentHandP2;
+
+  const isMyTurn = whoAmI === roundState.activePlayer;
+
+  const playCard = (theater: THEATER) => {
+    if (selectedCard === null) {
+      throw new Error("what?");
+    }
+
+    roundState.playCard({
+      theater,
+      id: selectedCard,
+      faceUp: true
+    });
+    setSelectedCard(null);
+
+    firebase
+      .firestore()
+      .collection("rounds")
+      .doc(gameId)
+      .set(
+        {
+          roundState: JSON.stringify(roundState.toJSON())
+        },
+        { merge: true }
+      );
+  };
+
+  return (
+    <Container>
+      <NotificationContainer>
+        <div>
+          You are playing against {whoAmI === PLAYER.ONE ? gameStore.playerTwoName : gameStore.playerOneName}
+        </div>
+        <br />
+        <div>
+        {isMyTurn
+          ? "It's your turn!"
+          : "The other player is taking their turn."}
+        </div>
+      </NotificationContainer>
+      <PlayingFieldContainer>
+        <PlayingField
+          boardState={roundState.boardState}
+          cardSelected={selectedCard !== null && isMyTurn}
+          whoAmI={whoAmI}
+          onTheaterSelected={playCard}
+        />
+      </PlayingFieldContainer>
+      <HandContainer>
+        <Hand cards={hand} onSelectionChanged={handleCardSelectionChanged} />
+      </HandContainer>
+    </Container>
+  );
+});
+
+export default Game;

@@ -8,6 +8,8 @@ import styled from "styled-components";
 import { useAuthStore } from "utils/useAuthStore";
 import LogoutButton from "components/LogoutButton";
 import { observer } from "mobx-react";
+import NewGameButton from "components/NewGameButton";
+import Game from "pages/Game";
 
 const Container = styled.div`
   width: 100vw;
@@ -38,9 +40,14 @@ const App: React.FC = observer(() => {
             <Link to="/login">Log in</Link>
           </li>
           {auth.isAuthentiated() && (
-            <li>
-              <LogoutButton />
-            </li>
+            <>
+              <li>
+                <LogoutButton />
+              </li>
+              <li>
+                <NewGameButton />
+              </li>
+            </>
           )}
         </ul>
 
@@ -59,6 +66,9 @@ const App: React.FC = observer(() => {
             </Route>
             <Route path="/demo">
               <PlayingFieldTest />
+            </Route>
+            <Route path="/:gameId">
+              <Game />
             </Route>
           </Switch>
         </PageContainer>

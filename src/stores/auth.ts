@@ -26,6 +26,12 @@ export default class AuthStore {
     return this.user && (this.user.displayName || '');
   }
 
+  public uid(this: AuthStore & { user: firebase.User }): string;
+  // @computed
+  public uid(this: AuthStore): string | null {
+    return this.user && (this.user.uid);
+  }
+
   @action
   private readonly setUser = (user: firebase.User | null) => {
     this.user = user;

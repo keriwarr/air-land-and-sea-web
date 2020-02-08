@@ -78,10 +78,10 @@ const PlayingFieldTest: React.FC = observer(() => {
   return (
     <Container>
       <PlayingFieldContainer>
-        <PlayingField boardState={roundState.boardState} />
+        <PlayingField boardState={roundState.boardState} cardSelected={false} whoAmI={PLAYER.ONE} onTheaterSelected={() => {}} />
       </PlayingFieldContainer>
       <HandContainer>
-        <Hand cards={roundState.currentHandP1} />
+        <Hand cards={roundState.currentHandP1} onSelectionChanged={() => {}} />
       </HandContainer>
 
       {/* <div>

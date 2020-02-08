@@ -6,13 +6,6 @@ import Wind from "icons/Wind";
 import Land from "icons/Land";
 import Wave from "icons/Wave";
 
-interface IHandCardProps {
-  card: Readonly<CardInstance>;
-  position: number;
-  selected: boolean;
-  onClick?: () => void;
-}
-
 const CardPositioner = styled.div<{ position: number; selected: boolean }>`
   cursor: pointer;
   flex-basis: 2.25in;
@@ -96,11 +89,20 @@ const FlipButton = styled.div<{ position: number }>`
   }
 `;
 
+interface IHandCardProps {
+  card: Readonly<CardInstance>;
+  position: number;
+  selected: boolean;
+  onClick?: () => void;
+  onFaceUpChange?: (faceUp: boolean) => void;
+}
+
 const HandCard: React.FC<IHandCardProps> = ({
   card,
   position,
   selected,
-  onClick
+  onClick,
+  onFaceUpChange
 }) => {
   const [flipped, setFlipped] = useState<"initial" | "faceUp" | "faceDown">(
     "initial"
@@ -112,6 +114,12 @@ const HandCard: React.FC<IHandCardProps> = ({
   if (!selected && flipped === "faceDown") {
     setFlipped("faceUp");
   }
+
+  useEffect(() => {
+    if (onFaceUpChange && flipped !== "initial") {
+      onFaceUpChange(flipped === "faceUp");
+    }
+  }, [flipped, onFaceUpChange]);
 
   // TODO - listen to animation events instead of using timeout
   // I think this might be an issue if it runs twice in a row due to the above

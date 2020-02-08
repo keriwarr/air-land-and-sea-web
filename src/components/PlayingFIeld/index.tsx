@@ -1,6 +1,6 @@
 import React from "react";
 import styled from "styled-components";
-import { RoundState, PLAYER, THEATERS } from "air-land-and-sea-engine";
+import { RoundState, PLAYER, THEATERS, THEATER } from "air-land-and-sea-engine";
 import Card from "components/Card";
 import Wind from "icons/Wind";
 import Land from "icons/Land";
@@ -22,7 +22,11 @@ const Grid = styled.div`
   justify-items: center;
 `;
 
-const PlayerTheater = styled.div<{ opponent?: boolean; center?: boolean }>`
+const PlayerTheater = styled.div<{
+  opponent?: boolean;
+  center?: boolean;
+  selectable?: boolean;
+}>`
   width: 100%;
   height: 100%;
   align-self: ${props => (props.opponent ? "start" : "end")};
@@ -40,6 +44,19 @@ const PlayerTheater = styled.div<{ opponent?: boolean; center?: boolean }>`
       : ""}
 
   ${props => (props.opponent ? "transform: rotate(180deg);" : "")}
+
+  ${props =>
+    props.selectable
+      ? `
+    background-color: #ccffdd;
+    border: 1px solid #aaddbb;
+    border-radius: 10px;
+    margin-right: 5px;
+    margin-left: 5px;
+    width: calc(100% - 10px);
+    cursor: pointer;
+  `
+      : ""}
 `;
 
 const CardContainer = styled.div<{ index: number }>`
@@ -65,34 +82,52 @@ const CenterFieldContainer = styled.div`
 
 interface IProps {
   boardState: RoundState["boardState"];
+  cardSelected: boolean;
+  whoAmI: PLAYER;
+  onTheaterSelected: (theater: THEATER) => void;
 }
 
 const Icons = { AIR: Wind, LAND: Land, SEA: Wave };
 
-const PlayingField: React.FC<IProps> = ({ boardState }) => (
+const PlayingField: React.FC<IProps> = ({
+  boardState,
+  cardSelected,
+  whoAmI,
+  onTheaterSelected
+}) => (
   <PlayingFieldContainer>
     <Grid>
-      {[PLAYER.TWO, PLAYER.ONE].map(player =>
+      {["opponent", "self"].map(side =>
         // TODO use the theater permutation from roundState
         THEATERS.map(theater => (
           /* TODO select player using game state */
           <PlayerTheater
-            opponent={player === PLAYER.TWO}
-            key={`${theater}-${player}`}
+            opponent={side === "opponent"}
+            key={`${theater}-${side}`}
             center={THEATERS[1] === theater}
+            selectable={side === "self" && cardSelected}
+            onClick={() => {
+              if (side === "self" && cardSelected) {
+                onTheaterSelected(theater);
+              }
+            }}
           >
-            {boardState[theater][player].map(
-              ({ card, faceUp }, index, cards) => (
-                <CardContainer key={card.id} index={cards.length - index - 1}>
-                  <Card
-                    card={card}
-                    // TODO - theming?
-                    Icons={Icons}
-                    flipped={!faceUp}
-                  />
-                </CardContainer>
-              )
-            )}
+            {boardState[theater][
+              side === "self"
+                ? whoAmI
+                : whoAmI === PLAYER.ONE
+                ? PLAYER.TWO
+                : PLAYER.ONE
+            ].map(({ card, faceUp }, index, cards) => (
+              <CardContainer key={card.id} index={cards.length - index - 1}>
+                <Card
+                  card={card}
+                  // TODO - theming?
+                  Icons={Icons}
+                  flipped={!faceUp}
+                />
+              </CardContainer>
+            ))}
           </PlayerTheater>
         ))
       )}

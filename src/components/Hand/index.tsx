@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import styled from "styled-components";
 import { Card as CardInstance } from "air-land-and-sea-engine";
 import { observer } from "mobx-react";
@@ -6,6 +6,7 @@ import HandCard from "components/HandCard";
 
 interface IHandProps {
   cards: Readonly<CardInstance>[];
+  onSelectionChanged: (id: number | null) => void;
 }
 
 const HandContainer = styled.div`
@@ -14,8 +15,12 @@ const HandContainer = styled.div`
   justify-content: flex-start;
 `;
 
-const Hand: React.FC<IHandProps> = observer(({ cards }) => {
-  const [selectedCard, setSelectedCard] = useState<number | null>(null);
+const Hand: React.FC<IHandProps> = observer(({ cards, onSelectionChanged }) => {
+  const [selectedCardIndex, setSelectedCard] = useState<number | null>(null);
+
+  useEffect(() => {
+    setSelectedCard(null);
+  }, [cards]);
 
   return (
     <div>
@@ -24,11 +29,15 @@ const Hand: React.FC<IHandProps> = observer(({ cards }) => {
           <HandCard
             key={card.id}
             position={index - (cards.length - 1) / 2}
-            selected={selectedCard === index}
+            selected={selectedCardIndex === index}
             card={card}
             // TODO - how to avoid inline arrow fns with react hooks?
             onClick={() => {
-              setSelectedCard(selectedCard === index ? null : index);
+              const selection = selectedCardIndex === index ? null : index;
+              setSelectedCard(selection);
+              onSelectionChanged(
+                selection === null ? null : cards[selection].id
+              );
             }}
           />
         ))}
