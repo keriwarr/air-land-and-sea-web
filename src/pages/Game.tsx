@@ -6,7 +6,7 @@ import { observable, action, computed, reaction } from "mobx";
 import AuthStore from "stores/auth";
 import { useAuthStore } from "utils/useAuthStore";
 import { isNotNull } from "utils/types";
-import { RoundState, THEATER, PLAYER, Deck } from "air-land-and-sea-engine";
+import { RoundState, THEATER, PLAYER, Deck, DECISION_TYPE } from "air-land-and-sea-engine";
 import styled from "styled-components";
 import PlayingField from "components/PlayingFIeld";
 import Hand from "components/Hand";
@@ -107,6 +107,19 @@ const Game: React.FC = observer(() => {
     faceUp: boolean;
   } | null>(null);
   const [deckIsSet, setDeckIsSet] = useState(false);
+  const [transportOrigin, setTransportOrigin] = useState<{
+    theater: THEATER;
+    indexFromTop: number;
+  } | null>(null);
+
+  const pushGameState = () => {
+    gameDocRef.set(
+      {
+        roundState: JSON.stringify(roundState.toJSON())
+      },
+      { merge: true }
+    );
+  };
 
   const gameDocRef = firebase
     .firestore()
@@ -248,25 +261,118 @@ const Game: React.FC = observer(() => {
 
   const isMyTurn = whoAmI === roundState.activePlayer;
 
-  const playCard = (theater: THEATER) => {
-    if (selectedCard === null) {
-      throw new Error("what?");
+  const { anticipatedDecision } = roundState;
+
+  const handleOwnTheaterSelected = (theater: THEATER) => {
+    if (!isMyTurn) {
+      throw new Error("shouldnt have happened");
     }
 
-    roundState.playCard({
-      theater,
-      id: selectedCard.id,
-      faceUp: selectedCard.faceUp
-    });
-    setSelectedCard(null);
+    if (anticipatedDecision === null) {
+      if (selectedCard === null) {
+        throw new Error("what?");
+      }
 
-    gameDocRef.set(
-      {
-        roundState: JSON.stringify(roundState.toJSON())
-      },
-      { merge: true }
-    );
+      roundState.playCard({
+        theater,
+        id: selectedCard.id,
+        faceUp: selectedCard.faceUp
+      });
+      setSelectedCard(null);
+      pushGameState();
+
+      return;
+    }
+
+    if (anticipatedDecision.type === DECISION_TYPE.REINFORCE_DECISION) {
+      // TODO: allow not making this decision
+      roundState.playReinforceDecision({
+        made: {
+          theater
+        }
+      });
+      pushGameState();
+
+      return;
+    }
+
+    if (
+      anticipatedDecision.type === DECISION_TYPE.TRANSPORT_DECISION &&
+      transportOrigin !== null
+    ) {
+      // TODO: allow not making this decision
+      roundState.playTransportDecision({
+        made: {
+          destinationTheater: theater,
+          originIndexFromTop: transportOrigin.indexFromTop,
+          originTheater: transportOrigin.theater
+        }
+      });
+      setTransportOrigin(null);
+      pushGameState();
+      return;
+    }
+
+    throw new Error("this shouldnt have been called");
   };
+
+  const handleAnyTheaterSelected = (theater: THEATER, player: PLAYER) => {
+    if (!isMyTurn) {
+      throw new Error("shouldnt have happened");
+    }
+
+    if (
+      anticipatedDecision === null ||
+      anticipatedDecision.type !== DECISION_TYPE.FLIP_DECISION
+    ) {
+      throw new Error("shouldnt have happened");
+    }
+
+    roundState.playFlipDecision({
+      theater,
+      targetedPlayer: player
+    });
+    pushGameState();
+  };
+
+  const playingFieldAnticipation = (() => {
+    if (!isMyTurn) {
+      return null;
+    }
+
+    if (anticipatedDecision === null) {
+      if (selectedCard === null) {
+        return null;
+      }
+
+      return "ownTheater";
+    }
+
+    if (anticipatedDecision.type === DECISION_TYPE.FLIP_DECISION) {
+      return "anyTheater";
+    }
+
+    if (anticipatedDecision.type === DECISION_TYPE.REDEPLOY_DECISION) {
+      return "ownFaceDownCard";
+    }
+
+    if (anticipatedDecision.type === DECISION_TYPE.REINFORCE_DECISION) {
+      return "ownTheater";
+    }
+
+    if (
+      anticipatedDecision.type === DECISION_TYPE.TRANSPORT_DECISION &&
+      transportOrigin !== null
+    ) {
+      return "ownTheater";
+    }
+
+    if (anticipatedDecision.type === DECISION_TYPE.TRANSPORT_DECISION) {
+      return "ownCard";
+    }
+
+    throw new Error("What?");
+  })();
 
   return (
     <Container>
@@ -287,9 +393,10 @@ const Game: React.FC = observer(() => {
       <PlayingFieldContainer>
         <PlayingField
           boardState={roundState.boardState}
-          cardSelected={selectedCard !== null && isMyTurn}
+          anticipation={playingFieldAnticipation}
           whoAmI={whoAmI}
-          onTheaterSelected={playCard}
+          onOwnTheaterSelected={handleOwnTheaterSelected}
+          onAnyTheaterSelected={handleAnyTheaterSelected}
         />
       </PlayingFieldContainer>
       <HandContainer>

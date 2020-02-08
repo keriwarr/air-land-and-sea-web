@@ -88,9 +88,15 @@ const CenterFieldContainer = styled.div`
 
 interface IProps {
   boardState: RoundState["boardState"];
-  cardSelected: boolean;
   whoAmI: PLAYER;
-  onTheaterSelected: (theater: THEATER) => void;
+  onOwnTheaterSelected: (theater: THEATER) => void;
+  onAnyTheaterSelected: (theater: THEATER, player: PLAYER) => void;
+  anticipation:
+    | "ownTheater"
+    | "anyTheater"
+    | "ownFaceDownCard"
+    | "ownCard"
+    | null;
 }
 
 const Icons = { AIR: Wind, LAND: Land, SEA: Wave };
@@ -103,9 +109,10 @@ const POSITIONS = Object.values(POSITION);
 
 const PlayingField: React.FC<IProps> = ({
   boardState,
-  cardSelected,
   whoAmI,
-  onTheaterSelected
+  onOwnTheaterSelected,
+  onAnyTheaterSelected,
+  anticipation
 }) => (
   <PlayingFieldContainer>
     <Grid>
@@ -115,6 +122,9 @@ const PlayingField: React.FC<IProps> = ({
           const positionPlayer =
             position === POSITION.SELF ? whoAmI : getOtherPlayer(whoAmI);
           const theaterCards = boardState[theater][positionPlayer];
+          const selectable =
+            anticipation === "anyTheater" ||
+            (position === POSITION.SELF && anticipation === "ownTheater");
 
           return (
             /* TODO select player using game state */
@@ -122,10 +132,16 @@ const PlayingField: React.FC<IProps> = ({
               opponent={position === POSITION.OPPONENT}
               key={`${theater}-${position}`}
               center={THEATERS[1] === theater}
-              selectable={position === POSITION.SELF && cardSelected}
+              selectable={selectable}
               onClick={() => {
-                if (position === POSITION.SELF && cardSelected) {
-                  onTheaterSelected(theater);
+                if (selectable) {
+                  if (anticipation === "ownTheater") {
+                    onOwnTheaterSelected(theater);
+                  } else if (anticipation === "anyTheater") {
+                    onAnyTheaterSelected(theater, positionPlayer);
+                  } else {
+                    throw new Error("foo");
+                  }
                 }
               }}
             >
