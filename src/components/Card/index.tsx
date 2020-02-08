@@ -16,7 +16,7 @@ interface ICardProps {
   selectable?: boolean;
 }
 
-const CardContainer = styled.div<{ selectable?: boolean }>`
+const CardContainer = styled.div<{ selectable?: boolean; flipped?: boolean }>`
   width: 2.25in;
   height: 3.11in;
   flex-shrink: 0;
@@ -39,9 +39,11 @@ const CardContainer = styled.div<{ selectable?: boolean }>`
   user-select: none;
 
   ${props => (props.selectable ? "cursor: pointer" : "")};
+
+  background-color: ${props => (props.flipped ? CARD_BACK_COLOR : "white")};
 `;
 
-const CardHeader = styled.div<{ theater: THEATER; flipped: boolean }>`
+const CardHeader = styled.div<{ theater: THEATER; flipped?: boolean }>`
   height: 27.5%;
 
   display: flex;
@@ -53,8 +55,8 @@ const CardHeader = styled.div<{ theater: THEATER; flipped: boolean }>`
   font-family: "Roboto Condensed", sans-serif;
   letter-spacing: -0.4px;
 
-  background-color: ${props =>
-    props.flipped ? CARD_BACK_COLOR : THEATER_COLOR[props.theater]};
+  ${props =>
+    props.flipped ? "" : `background-color: ${THEATER_COLOR[props.theater]}`};
 `;
 
 const CardRank = styled.div`
@@ -82,12 +84,11 @@ const CardDescription = styled.div`
   margin: auto 0px;
 `;
 
-const CardArt = styled.div<{ flipped: boolean }>`
+const CardArt = styled.div`
   flex-grow: 1;
   display: flex;
   justify-content: center;
   align-items: center;
-  background-color: ${props => (props.flipped ? CARD_BACK_COLOR : "white")};
 `;
 
 const Card: React.FC<ICardProps> = ({
@@ -100,7 +101,7 @@ const Card: React.FC<ICardProps> = ({
 }) => {
   const Icon = Icons[card.theater];
   return (
-    <CardContainer onClick={onClick} selectable={selectable}>
+    <CardContainer onClick={onClick} selectable={selectable} flipped={flipped}>
       <CardHeader theater={card.theater} flipped={flipped}>
         <CardRank>{flipped ? 2 : card.rank}</CardRank>
         {!flipped && (
@@ -110,7 +111,7 @@ const Card: React.FC<ICardProps> = ({
           </CardSpecification>
         )}
       </CardHeader>
-      <CardArt flipped={flipped}>
+      <CardArt>
         {(!flipped || inHand) && (
           <Icon width="50%" height="50%" fill={THEATER_COLOR[card.theater]} />
         )}

@@ -487,6 +487,18 @@ const Game: React.FC = observer(() => {
     pushGameState();
   };
 
+  const opponentName =
+    whoAmI === PLAYER.ONE ? gameStore.playerTwoName : gameStore.playerOneName;
+
+  const gameStatusText =
+    roundState.victor !== null
+      ? roundState.victor === whoAmI
+        ? "You won that round :D"
+        : "You lost that round :'("
+      : isMyTurn
+      ? "It's your turn!"
+      : "The other player is taking their turn.";
+
   return (
     <Container>
       <NotificationContainer>
@@ -500,22 +512,9 @@ const Game: React.FC = observer(() => {
           </button>
         </Column>
         <Column>
-          <div>
-            You are playing against{" "}
-            {whoAmI === PLAYER.ONE
-              ? gameStore.playerTwoName
-              : gameStore.playerOneName}
-          </div>
+          <div>You are playing against {opponentName}</div>
           <br />
-          <div>
-            {roundState.victor !== null
-              ? roundState.victor === whoAmI
-                ? "You won that round :D"
-                : "You lost that round :'("
-              : isMyTurn
-              ? "It's your turn!"
-              : "The other player is taking their turn."}
-          </div>
+          <div>{gameStatusText}</div>
         </Column>
       </NotificationContainer>
       <PlayingFieldContainer>
