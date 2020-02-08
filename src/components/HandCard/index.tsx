@@ -94,6 +94,7 @@ interface IHandCardProps {
   position: number;
   selected: boolean;
   onClick?: () => void;
+  onFlip?: (faceUp: boolean) => void;
   onFaceUpChange?: (faceUp: boolean) => void;
 }
 
@@ -102,7 +103,8 @@ const HandCard: React.FC<IHandCardProps> = ({
   position,
   selected,
   onClick,
-  onFaceUpChange
+  onFaceUpChange,
+  onFlip
 }) => {
   const [flipped, setFlipped] = useState<"initial" | "faceUp" | "faceDown">(
     "initial"
@@ -152,7 +154,11 @@ const HandCard: React.FC<IHandCardProps> = ({
         <FlipButton
           position={position}
           onClick={() => {
-            setFlipped(flipped === "faceDown" ? "faceUp" : "faceDown");
+            const newFlipped = flipped === "faceDown" ? "faceUp" : "faceDown";
+            setFlipped(newFlipped);
+            if (onFlip) {
+              onFlip(newFlipped === "faceUp");
+            }
           }}
         />
       )}

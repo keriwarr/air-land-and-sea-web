@@ -102,12 +102,11 @@ const Game: React.FC = observer(() => {
   const [roundState, setRoundState] = useState(
     () => new RoundState([THEATER.AIR, THEATER.LAND, THEATER.SEA])
   );
-  const [selectedCard, setSelectedCard] = useState<number | null>(null);
+  const [selectedCard, setSelectedCard] = useState<{
+    id: number;
+    faceUp: boolean;
+  } | null>(null);
   const [deckIsSet, setDeckIsSet] = useState(false);
-
-  if (!auth.isAuthentiated()) {
-    return null;
-  }
 
   const gameDocRef = firebase
     .firestore()
@@ -210,9 +209,16 @@ const Game: React.FC = observer(() => {
     gameDocRef
   ]);
 
-  const handleCardSelectionChanged = useCallback((cardId: number | null) => {
-    setSelectedCard(cardId);
-  }, []);
+  const handleCardSelectionChanged = useCallback(
+    (cardId: number | null, faceUp: boolean) => {
+      setSelectedCard(cardId === null ? null : { id: cardId, faceUp });
+    },
+    []
+  );
+
+  if (!auth.isAuthentiated()) {
+    return null;
+  }
 
   if (!gameStore.gameInitialized) {
     return <div>Loading...</div>;
@@ -249,8 +255,8 @@ const Game: React.FC = observer(() => {
 
     roundState.playCard({
       theater,
-      id: selectedCard,
-      faceUp: true
+      id: selectedCard.id,
+      faceUp: selectedCard.faceUp
     });
     setSelectedCard(null);
 

@@ -6,7 +6,7 @@ import HandCard from "components/HandCard";
 
 interface IHandProps {
   cards: Readonly<CardInstance>[];
-  onSelectionChanged: (id: number | null) => void;
+  onSelectionChanged: (id: number | null, faceUp: boolean) => void;
 }
 
 const HandContainer = styled.div`
@@ -39,7 +39,12 @@ const Hand: React.FC<IHandProps> = observer(({ cards, onSelectionChanged }) => {
                 selection === null ? null : cards[selection].id;
 
               setSelectedCardIndex(selection);
-              onSelectionChanged(selectedCardId);
+              onSelectionChanged(selectedCardId, true);
+            }}
+            onFlip={faceUp => {
+              const selectedCardId =
+                selectedCardIndex === null ? null : cards[selectedCardIndex].id;
+              onSelectionChanged(selectedCardId, faceUp);
             }}
           />
         ))}
