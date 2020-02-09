@@ -1,14 +1,11 @@
 import React from "react";
-import { BrowserRouter as Router, Switch, Route, Link } from "react-router-dom";
+import { BrowserRouter as Router, Switch, Route } from "react-router-dom";
 import Home from "pages/Home";
-import SignUp from "pages/SignUp";
-import Login from "pages/LogIn";
+import SignUp from "pages/Signup";
+import Login from "pages/Login";
 import styled from "styled-components";
-import { useAuthStore } from "utils/useAuthStore";
-import LogoutButton from "components/LogoutButton";
-import { observer } from "mobx-react";
-import NewGameButton from "components/NewGameButton";
 import Game from "pages/Game";
+import Navbar from "components/Navbar";
 
 const Container = styled.div`
   width: 100vw;
@@ -20,57 +17,31 @@ const Container = styled.div`
 
 const PageContainer = styled.div`
   flex-grow: 1;
+  display: flex;
 `;
 
-const App: React.FC = observer(() => {
-  const auth = useAuthStore();
-
-  return (
-    <Router>
-      <Container>
-        <ul>
-          <li>
-            <Link to="/">Home</Link>
-          </li>
-          <li>
-            <Link to="/signup">Sign Up</Link>
-          </li>
-          <li>
-            <Link to="/login">Log in</Link>
-          </li>
-          {auth.isAuthentiated() && (
-            <>
-              <li>
-                <LogoutButton />
-              </li>
-              <li>
-                <NewGameButton />
-              </li>
-            </>
-          )}
-        </ul>
-
-        <hr />
-
-        <PageContainer>
-          <Switch>
-            <Route exact path="/">
-              <Home />
-            </Route>
-            <Route path="/signup">
-              <SignUp />
-            </Route>
-            <Route path="/login">
-              <Login />
-            </Route>
-            <Route path="/:gameId">
-              <Game />
-            </Route>
-          </Switch>
-        </PageContainer>
-      </Container>
-    </Router>
-  );
-});
+const App: React.FC = () => (
+  <Router>
+    <Container>
+      <Navbar />
+      <PageContainer>
+        <Switch>
+          <Route exact path="/">
+            <Home />
+          </Route>
+          <Route path="/signup">
+            <SignUp />
+          </Route>
+          <Route path="/login">
+            <Login />
+          </Route>
+          <Route path="/:gameId">
+            <Game />
+          </Route>
+        </Switch>
+      </PageContainer>
+    </Container>
+  </Router>
+);
 
 export default App;

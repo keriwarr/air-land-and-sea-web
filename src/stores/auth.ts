@@ -1,4 +1,4 @@
-import * as firebase from "firebase";
+import firebase from 'firebase/app';
 import { observable, action } from "mobx";
 
 export default class AuthStore {

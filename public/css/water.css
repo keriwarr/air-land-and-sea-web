@@ -16,16 +16,6 @@ textarea {
 
 h1 {
   font-size: 2.2em;
-  margin-top: 0;
-}
-
-h1,
-h2,
-h3,
-h4,
-h5,
-h6 {
-  margin-bottom: 12px;
 }
 
 h1,
@@ -52,13 +42,11 @@ th {
 
 blockquote {
   border-left: 4px solid rgba(0, 150, 191, 0.67);
-  margin: 1.5em 0;
   padding: 0.5em 1em;
   font-style: italic;
 }
 
 blockquote > footer {
-  margin-top: 10px;
   font-style: normal;
 }
 
@@ -87,8 +75,6 @@ textarea {
   background-color: #efefef;
   font-family: inherit;
   font-size: inherit;
-  margin-right: 6px;
-  margin-bottom: 6px;
   padding: 10px;
   border: none;
   border-radius: 6px;
@@ -103,7 +89,6 @@ textarea {
 }
 
 textarea {
-  margin-right: 0;
   width: 100%;
   box-sizing: border-box;
   resize: vertical;
@@ -194,7 +179,6 @@ hr {
 
 table {
   border-collapse: collapse;
-  margin-bottom: 10px;
   width: 100%;
 }
 

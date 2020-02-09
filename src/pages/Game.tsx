@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useCallback } from "react";
 import { observer } from "mobx-react";
 import { useParams, useHistory } from "react-router-dom";
-import * as firebase from "firebase";
+import firebase from 'firebase/app';
 import { observable, action, computed, reaction } from "mobx";
 import AuthStore from "stores/auth";
 import { useAuthStore } from "utils/useAuthStore";

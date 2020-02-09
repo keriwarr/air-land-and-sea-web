@@ -1,5 +1,5 @@
 import React from "react";
-import * as firebase from "firebase";
+import firebase from 'firebase/app';
 import { useHistory } from "react-router-dom";
 import { useAuthStore } from "utils/useAuthStore";
 import { observer } from "mobx-react";
