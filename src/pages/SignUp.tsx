@@ -1,6 +1,7 @@
 import React from "react";
 import styled from "styled-components";
 import SignupForm from "components/SignupForm";
+import { CenteredRow } from "components/Flex";
 
 const Container = styled.div`
   flex-grow: 1;
@@ -8,12 +9,13 @@ const Container = styled.div`
   display: flex;
   flex-direction: column;
   justify-content: center;
-  align-items: center;
 `;
 
 const SignUp: React.FC = () => (
   <Container>
-    <SignupForm standAlone={true} />
+    <CenteredRow>
+      <SignupForm standAlone={true} />
+    </CenteredRow>
   </Container>
 );
 

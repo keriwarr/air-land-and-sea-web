@@ -3,6 +3,9 @@ import { observable, action, when } from "mobx";
 import { History, Location } from "history";
 import queryString from "query-string";
 
+export type AuthenticatedStore = AuthStore & { user: firebase.User };
+export type UnauthenticatedStore = AuthStore & { user: null };
+
 export default class AuthStore {
   @observable
   private user: firebase.User | null = null;
@@ -12,23 +15,29 @@ export default class AuthStore {
   }
 
   // @computed
-  public readonly isAuthenticated = (): this is { user: firebase.User } => {
+  public readonly isAuthenticated = (): this is AuthenticatedStore => {
     return this.user !== null;
   };
 
-  public email(this: AuthStore & { user: firebase.User }): string;
+  public email(this: AuthenticatedStore): string;
+  public email(this: UnauthenticatedStore): null;
   // @computed
   public email(this: AuthStore): string | null {
+    if (this.user && this.user.email === null) {
+      throw new Error("User does not have an email!!");
+    }
     return this.user && this.user.email;
   }
 
-  public displayName(this: AuthStore & { user: firebase.User }): string;
+  public displayName(this: AuthenticatedStore): string;
+  public displayName(this: UnauthenticatedStore): null;
   // @computed
   public displayName(this: AuthStore): string | null {
     return this.user && (this.user.displayName || "");
   }
 
-  public uid(this: AuthStore & { user: firebase.User }): string;
+  public uid(this: AuthenticatedStore): string;
+  public uid(this: UnauthenticatedStore): null;
   // @computed
   public uid(this: AuthStore): string | null {
     return this.user && this.user.uid;

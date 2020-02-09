@@ -1,13 +1,13 @@
 import React, { useState } from "react";
 import styled from "styled-components";
 import { useHistory, useLocation } from "react-router-dom";
-import { FixedSizeSpacer } from "components/Flex";
+import { FixedSizeSpacer, CenteredRow } from "components/Flex";
 import { useAuthStore } from "utils/useAuthStore";
 
 const Form = styled.form`
   display: flex;
   flex-direction: column;
-  align-items: center;
+  text-align: center;
 `;
 
 interface IProps {
@@ -45,11 +45,13 @@ const LoginForm: React.FC<IProps> = ({ standAlone }) => {
         {...(standAlone && { tabIndex: 2 })}
       />
       <FixedSizeSpacer flexBasis={10} />
-      <input
-        type="submit"
-        value="Submit"
-        {...(standAlone && { tabIndex: 3 })}
-      />
+      <CenteredRow>
+        <input
+          type="submit"
+          value="Submit"
+          {...(standAlone && { tabIndex: 3 })}
+        />
+      </CenteredRow>
     </Form>
   );
 };
