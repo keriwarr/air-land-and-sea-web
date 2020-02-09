@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useCallback } from "react";
 import { observer } from "mobx-react";
-import { useParams, useHistory } from "react-router-dom";
+import { useParams, useHistory, useLocation } from "react-router-dom";
 import firebase from 'firebase/app';
 import { observable, action, computed, reaction } from "mobx";
 import AuthStore from "stores/auth";
@@ -43,7 +43,7 @@ class GameStore {
   @computed
   get inGame() {
     return (
-      this.auth.isAuthentiated() &&
+      this.auth.isAuthenticated() &&
       (this.auth.uid() === this.playerOneUid ||
         this.auth.uid() === this.playerTwoUid)
     );
@@ -114,6 +114,7 @@ const Game: React.FC = observer(() => {
   const auth = useAuthStore();
   const [gameStore] = useState(new GameStore(auth));
   const history = useHistory();
+  const location = useLocation();
   const [roundState, setRoundState] = useState(
     () => new RoundState([THEATER.AIR, THEATER.LAND, THEATER.SEA])
   );
@@ -203,12 +204,12 @@ const Game: React.FC = observer(() => {
   }, [gameDocRef, gameId, gameStore]);
 
   useEffect(() => {
-    if (!gameStore.gameInitialized || !auth.isAuthentiated()) {
+    if (!gameStore.gameInitialized || !auth.isAuthenticated()) {
       return;
     }
 
     if (gameStore.gameFull && !gameStore.inGame) {
-      history.push("/");
+      history.push(`/`);
       return;
     }
 
@@ -226,16 +227,7 @@ const Game: React.FC = observer(() => {
           setDeckIsSet(true);
         });
     }
-  }, [
-    gameId,
-    gameStore.gameInitialized,
-    gameStore.gameFull,
-    gameStore.inGame,
-    history,
-    auth,
-    roundState,
-    gameDocRef
-  ]);
+  }, [gameId, gameStore.gameInitialized, gameStore.gameFull, gameStore.inGame, history, auth, roundState, gameDocRef, location.pathname]);
 
   const handleCardSelectionChanged = useCallback(
     (cardId: number | null, faceUp: boolean) => {
@@ -244,7 +236,7 @@ const Game: React.FC = observer(() => {
     []
   );
 
-  if (!auth.isAuthentiated()) {
+  if (!auth.isAuthenticated()) {
     return null;
   }
 

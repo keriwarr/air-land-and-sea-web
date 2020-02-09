@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import styled from "styled-components";
-import { useHistory } from "react-router-dom";
+import { useHistory, useLocation } from "react-router-dom";
 import { FixedSizeSpacer } from "components/Flex";
 import { useAuthStore } from "utils/useAuthStore";
 
@@ -18,11 +18,12 @@ const LoginForm: React.FC<IProps> = ({ standAlone }) => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const history = useHistory();
+  const location = useLocation();
   const auth = useAuthStore();
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    auth.login(history, email, password);
+    auth.login(history, location, email, password);
   };
 
   return (

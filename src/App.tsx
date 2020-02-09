@@ -6,6 +6,7 @@ import Login from "pages/Login";
 import styled from "styled-components";
 import Game from "pages/Game";
 import Navbar from "components/Navbar";
+import AuthenticatedRoute from "components/AuthenticatedRoute";
 
 const Container = styled.div`
   width: 100vw;
@@ -35,9 +36,10 @@ const App: React.FC = () => (
           <Route path="/login">
             <Login />
           </Route>
-          <Route path="/:gameId">
+          <AuthenticatedRoute path="/:gameId">
             <Game />
-          </Route>
+          </AuthenticatedRoute>
+          {/* TODO - default route */}
         </Switch>
       </PageContainer>
     </Container>

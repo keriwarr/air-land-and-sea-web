@@ -1,6 +1,7 @@
 import firebase from "firebase/app";
 import { observable, action, when } from "mobx";
-import { History } from "history";
+import { History, Location } from "history";
+import queryString from "query-string";
 
 export default class AuthStore {
   @observable
@@ -11,7 +12,7 @@ export default class AuthStore {
   }
 
   // @computed
-  public readonly isAuthentiated = (): this is { user: firebase.User } => {
+  public readonly isAuthenticated = (): this is { user: firebase.User } => {
     return this.user !== null;
   };
 
@@ -48,11 +49,16 @@ export default class AuthStore {
     });
   }
 
-  public readonly signup = async (history: History, displayName: string, email: string, password: string) => {
+  public readonly signup = async (
+    history: History,
+    displayName: string,
+    email: string,
+    password: string
+  ) => {
     try {
       await firebase.auth().createUserWithEmailAndPassword(email, password);
 
-      await when(() => this.isAuthentiated());
+      await when(() => this.isAuthenticated());
 
       await this.setDisplayName(displayName);
 
@@ -60,17 +66,29 @@ export default class AuthStore {
     } catch (e) {
       console.error(e);
     }
-  }
+  };
 
-  public readonly login = async (history: History, email: string, password: string) => {
+  public readonly login = async (
+    history: History,
+    location: Location,
+    email: string,
+    password: string
+  ) => {
     try {
       await firebase.auth().signInWithEmailAndPassword(email, password);
 
-      history.push("/");
+      const redirectTo = queryString.parse(location.search)["redirect_to"];
+      const nextUrl = Array.isArray(redirectTo)
+        ? decodeURIComponent(redirectTo[0])
+        : redirectTo
+        ? decodeURIComponent(redirectTo)
+        : "/";
+
+      history.push(nextUrl);
     } catch (e) {
       console.error(e);
     }
-  }
+  };
 
   public readonly logout = async (history: History) => {
     try {

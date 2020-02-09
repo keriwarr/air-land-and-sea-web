@@ -8,12 +8,12 @@ const NewGameButton: React.FC = observer(() => {
   const history = useHistory();
   const auth = useAuthStore();
 
-  if (!auth.isAuthentiated()) {
+  if (!auth.isAuthenticated()) {
     return null;
   }
 
   const newGame = async () => {
-    if (!auth.isAuthentiated()) {
+    if (!auth.isAuthenticated()) {
       return null;
     }
 

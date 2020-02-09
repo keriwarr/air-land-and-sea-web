@@ -6,7 +6,7 @@ const Home: React.FC = observer(() => {
   const auth = useAuthStore();
 
   return (
-    <div>{auth.isAuthentiated() ? `Hello ${auth.displayName()}.` : "Home"}</div>
+    <div>{auth.isAuthenticated() ? `Hello ${auth.displayName()}.` : "Home"}</div>
   );
 });
 
