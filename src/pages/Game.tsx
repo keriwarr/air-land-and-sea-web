@@ -14,7 +14,7 @@ import {
   DECISION_TYPE
 } from "air-land-and-sea-engine";
 import styled from "styled-components";
-import PlayingField from "components/PlayingFIeld";
+import PlayingField from "components/PlayingField";
 import Hand from "components/Hand";
 
 class GameStore {
