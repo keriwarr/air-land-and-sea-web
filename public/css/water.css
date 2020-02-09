@@ -113,6 +113,13 @@ textarea:focus {
   box-shadow: 0 0 0 2px rgba(0, 150, 191, 0.67);
 }
 
+button.error,
+input.error,
+select.error,
+textarea.error {
+  box-shadow: 0 0 0 2px rgba(189, 9, 0, 0.67);
+}
+
 button:active,
 input[type="button"]:active,
 input[type="checkbox"]:active,

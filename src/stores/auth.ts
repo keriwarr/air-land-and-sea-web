@@ -85,6 +85,9 @@ export default class AuthStore {
     this.setUser(firebase.auth().currentUser);
   };
 
+  /**
+   * @throws
+   */
   public readonly signup = async (
     history: History,
     location: Location,
@@ -92,56 +95,50 @@ export default class AuthStore {
     email: string,
     password: string
   ) => {
-    try {
-      await firebase.auth().createUserWithEmailAndPassword(email, password);
-      await when(() => this.userData !== null);
+    await firebase.auth().createUserWithEmailAndPassword(email, password);
+    await when(() => this.userData !== null);
 
-      await this.saveDisplayName(displayName);
-      await when(() => this.isAuthenticated);
+    await this.saveDisplayName(displayName);
+    await when(() => this.isAuthenticated);
 
-      if (`${location.pathname}${location.search}` !== "/") {
-        history.push("/");
-      }
-    } catch (e) {
-      console.error(e);
+    if (`${location.pathname}${location.search}` !== "/") {
+      history.push("/");
     }
   };
 
+  /**
+   * @throws
+   */
   public readonly login = async (
     history: History,
     location: Location,
     email: string,
     password: string
   ) => {
-    try {
-      await firebase.auth().signInWithEmailAndPassword(email, password);
+    await firebase.auth().signInWithEmailAndPassword(email, password);
 
-      await when(() => this.isAuthenticated);
+    await when(() => this.isAuthenticated);
 
-      const redirectTo = queryString.parse(location.search)["redirect_to"];
-      const nextUrl = Array.isArray(redirectTo)
-        ? decodeURIComponent(redirectTo[0])
-        : redirectTo
-        ? decodeURIComponent(redirectTo)
-        : "/";
+    const redirectTo = queryString.parse(location.search)["redirect_to"];
+    const nextUrl = Array.isArray(redirectTo)
+      ? decodeURIComponent(redirectTo[0])
+      : redirectTo
+      ? decodeURIComponent(redirectTo)
+      : "/";
 
-      if (nextUrl !== location.pathname) {
-        history.push(nextUrl);
-      }
-    } catch (e) {
-      console.error(e);
+    if (nextUrl !== location.pathname) {
+      history.push(nextUrl);
     }
   };
 
+  /**
+   * @throws
+   */
   public readonly logout = async (history: History, location: Location) => {
-    try {
-      await firebase.auth().signOut();
+    await firebase.auth().signOut();
 
-      if (`${location.pathname}${location.search}` !== "/") {
-        history.push("/");
-      }
-    } catch (e) {
-      console.error(e);
+    if (`${location.pathname}${location.search}` !== "/") {
+      history.push("/");
     }
   };
 

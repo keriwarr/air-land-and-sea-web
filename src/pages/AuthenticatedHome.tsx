@@ -51,7 +51,7 @@ const AuthenticatedHome: React.FC<IProps> = ({ auth }) => {
         )}
       </FixedSizeSpacer>
       <CenteredRow>
-        <h3>Hey there, {auth.displayName()}</h3>
+        <h3>Hey there, {auth.displayName()}.</h3>
       </CenteredRow>
     </Container>
   );
