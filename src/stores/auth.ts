@@ -99,7 +99,7 @@ export default class AuthStore {
       await this.saveDisplayName(displayName);
       await when(() => this.isAuthenticated);
 
-      if (location.pathname !== "/") {
+      if (`${location.pathname}${location.search}` !== "/") {
         history.push("/");
       }
     } catch (e) {
@@ -137,7 +137,7 @@ export default class AuthStore {
     try {
       await firebase.auth().signOut();
 
-      if (location.pathname !== "/") {
+      if (`${location.pathname}${location.search}` !== "/") {
         history.push("/");
       }
     } catch (e) {
