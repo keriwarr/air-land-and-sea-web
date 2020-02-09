@@ -1,5 +1,6 @@
-import firebase from 'firebase/app';
-import { observable, action } from "mobx";
+import firebase from "firebase/app";
+import { observable, action, when } from "mobx";
+import { History } from "history";
 
 export default class AuthStore {
   @observable
@@ -23,13 +24,13 @@ export default class AuthStore {
   public displayName(this: AuthStore & { user: firebase.User }): string;
   // @computed
   public displayName(this: AuthStore): string | null {
-    return this.user && (this.user.displayName || '');
+    return this.user && (this.user.displayName || "");
   }
 
   public uid(this: AuthStore & { user: firebase.User }): string;
   // @computed
   public uid(this: AuthStore): string | null {
-    return this.user && (this.user.uid);
+    return this.user && this.user.uid;
   }
 
   @action
@@ -46,6 +47,41 @@ export default class AuthStore {
       displayName
     });
   }
+
+  public readonly signup = async (history: History, displayName: string, email: string, password: string) => {
+    try {
+      await firebase.auth().createUserWithEmailAndPassword(email, password);
+
+      await when(() => this.isAuthentiated());
+
+      await this.setDisplayName(displayName);
+
+      history.push("/");
+    } catch (e) {
+      console.error(e);
+    }
+  }
+
+  public readonly login = async (history: History, email: string, password: string) => {
+    try {
+      await firebase.auth().signInWithEmailAndPassword(email, password);
+
+      history.push("/");
+    } catch (e) {
+      console.error(e);
+    }
+  }
+
+  public readonly logout = async (history: History) => {
+    try {
+      await firebase.auth().signOut();
+
+      // if not already at '/' ?
+      history.push("/");
+    } catch (e) {
+      console.error(e);
+    }
+  };
 
   private readonly initiateFirebaseListener = () => {
     firebase.auth().onAuthStateChanged(this.setUser);

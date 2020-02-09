@@ -1,26 +1,12 @@
 import React from "react";
-import firebase from 'firebase/app';
 import { useHistory } from "react-router-dom";
+import { useAuthStore } from "utils/useAuthStore";
 
 const LogoutButton: React.FC = () => {
   const history = useHistory();
+  const auth = useAuthStore();
 
-  return (
-    <button
-      onClick={async () => {
-        try {
-          await firebase.auth().signOut();
-
-          // if not already at '/' ?
-          history.push("/");
-        } catch (e) {
-          console.error(e);
-        }
-      }}
-    >
-      Sign out
-    </button>
-  );
+  return <button onClick={() => auth.logout(history)}>Log out</button>;
 };
 
 export default LogoutButton;

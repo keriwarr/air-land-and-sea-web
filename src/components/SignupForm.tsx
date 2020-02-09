@@ -1,9 +1,7 @@
 import React, { useState } from "react";
 import styled from "styled-components";
-import * as firebase from "firebase/app";
 import { useHistory } from "react-router-dom";
 import { useAuthStore } from "utils/useAuthStore";
-import { when } from "mobx";
 import { FixedSizeSpacer } from "./Flex";
 
 const Form = styled.form`
@@ -25,18 +23,7 @@ const SignupForm: React.FC<IProps> = ({ standAlone }) => {
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-
-    try {
-      await firebase.auth().createUserWithEmailAndPassword(email, password);
-
-      await when(() => auth.isAuthentiated());
-
-      await auth.setDisplayName(displayName);
-
-      history.push("/");
-    } catch (e) {
-      console.error(e);
-    }
+    auth.signup(history, displayName, email, password);
   };
 
   return (

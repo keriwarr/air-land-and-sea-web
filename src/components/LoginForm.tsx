@@ -1,8 +1,8 @@
 import React, { useState } from "react";
 import styled from "styled-components";
-import * as firebase from "firebase/app";
 import { useHistory } from "react-router-dom";
 import { FixedSizeSpacer } from "components/Flex";
+import { useAuthStore } from "utils/useAuthStore";
 
 const Form = styled.form`
   display: flex;
@@ -18,17 +18,11 @@ const LoginForm: React.FC<IProps> = ({ standAlone }) => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const history = useHistory();
+  const auth = useAuthStore();
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-
-    try {
-      await firebase.auth().signInWithEmailAndPassword(email, password);
-
-      history.push("/");
-    } catch (e) {
-      console.error(e);
-    }
+    auth.login(history, email, password);
   };
 
   return (
