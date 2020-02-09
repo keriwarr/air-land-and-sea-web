@@ -1,12 +1,12 @@
 import React from "react";
-import { AuthenticatedStore } from "stores/auth";
+import { AuthenticatedAuthStore } from "stores/auth";
 
 interface IProps {
-  auth: AuthenticatedStore;
+  auth: AuthenticatedAuthStore;
 }
 
-const AuthenticatedHome: React.FC<IProps> = ({ auth }) => (
-  <div>Hello, {auth.displayName()}</div>
-);
+const AuthenticatedHome: React.FC<IProps> = ({ auth }) => {
+  return <div>Hello, {auth.displayName()}</div>;
+};
 
 export default AuthenticatedHome;

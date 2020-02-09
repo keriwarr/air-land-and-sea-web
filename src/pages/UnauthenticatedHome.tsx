@@ -1,5 +1,5 @@
 import React from "react";
-import { UnauthenticatedStore } from "stores/auth";
+import { UnauthenticatedAuthStore } from "stores/auth";
 import styled from "styled-components";
 import { FixedSizeSpacer, CenteredRow } from "components/Flex";
 import LoginForm from "components/LoginForm";
@@ -20,7 +20,7 @@ const Header = styled.h1`
 `;
 
 interface IProps {
-  auth: UnauthenticatedStore;
+  auth: UnauthenticatedAuthStore;
 }
 
 const UnauthenticatedHome: React.FC<IProps> = ({ auth }) => (

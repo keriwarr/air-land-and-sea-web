@@ -1,9 +1,9 @@
 import React, { useEffect, useState, useCallback } from "react";
 import { observer } from "mobx-react";
 import { useParams, useHistory, useLocation } from "react-router-dom";
-import firebase from 'firebase/app';
+import firebase from "firebase/app";
 import { observable, action, computed, reaction } from "mobx";
-import AuthStore from "stores/auth";
+import AuthStore, { AuthenticatedAuthStore } from "stores/auth";
 import { useAuthStore } from "utils/useAuthStore";
 import { isNotNull } from "utils/types";
 import {
@@ -43,7 +43,7 @@ class GameStore {
   @computed
   get inGame() {
     return (
-      this.auth.isAuthenticated() &&
+      this.auth.isAuthenticated &&
       (this.auth.uid() === this.playerOneUid ||
         this.auth.uid() === this.playerTwoUid)
     );
@@ -204,12 +204,14 @@ const Game: React.FC = observer(() => {
   }, [gameDocRef, gameId, gameStore]);
 
   useEffect(() => {
-    if (!gameStore.gameInitialized || !auth.isAuthenticated()) {
+    if (!gameStore.gameInitialized || !auth.isAuthenticated) {
       return;
     }
 
+    const authenticatedAuthStore = auth as AuthenticatedAuthStore;
+
     if (gameStore.gameFull && !gameStore.inGame) {
-      history.push(`/`);
+      history.push(`/?error=game_full`);
       return;
     }
 
@@ -217,8 +219,8 @@ const Game: React.FC = observer(() => {
       gameDocRef
         .set(
           {
-            playerTwoUid: auth.uid(),
-            playerTwoName: auth.displayName(),
+            playerTwoUid: authenticatedAuthStore.uid(),
+            playerTwoName: authenticatedAuthStore.displayName(),
             roundState: JSON.stringify(roundState.toJSON())
           },
           { merge: true }
@@ -227,7 +229,17 @@ const Game: React.FC = observer(() => {
           setDeckIsSet(true);
         });
     }
-  }, [gameId, gameStore.gameInitialized, gameStore.gameFull, gameStore.inGame, history, auth, roundState, gameDocRef, location.pathname]);
+  }, [
+    gameId,
+    gameStore.gameInitialized,
+    gameStore.gameFull,
+    gameStore.inGame,
+    history,
+    auth,
+    roundState,
+    gameDocRef,
+    location.pathname
+  ]);
 
   const handleCardSelectionChanged = useCallback(
     (cardId: number | null, faceUp: boolean) => {
@@ -236,7 +248,8 @@ const Game: React.FC = observer(() => {
     []
   );
 
-  if (!auth.isAuthenticated()) {
+  if (!auth.isAuthenticated) {
+    // TODO - this should be typing auth as Authenticated in the counterfactual
     return null;
   }
 
@@ -254,10 +267,10 @@ const Game: React.FC = observer(() => {
   }
 
   const whoAmI = (() => {
-    if (gameStore.playerOneUid === auth.uid()) {
+    if (gameStore.playerOneUid === (auth as AuthenticatedAuthStore).uid()) {
       return PLAYER.ONE;
     }
-    if (gameStore.playerTwoUid === auth.uid()) {
+    if (gameStore.playerTwoUid === (auth as AuthenticatedAuthStore).uid()) {
       return PLAYER.TWO;
     }
     throw new Error("Why didn't it redirect?");

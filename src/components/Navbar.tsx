@@ -27,7 +27,7 @@ const Navbar: React.FC = observer(() => {
         <h3>Air, Land, & Sea</h3>
       </Link>
       <GrowingSpacer />
-      {auth.isAuthenticated() && (
+      {auth.isAuthenticated && (
         <>
           <NewGameButton />
           <FixedSizeSpacer flexBasis={20} />

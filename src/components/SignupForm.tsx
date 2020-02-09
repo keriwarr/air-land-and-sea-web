@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import styled from "styled-components";
-import { useHistory } from "react-router-dom";
+import { useHistory, useLocation } from "react-router-dom";
 import { useAuthStore } from "utils/useAuthStore";
 import { FixedSizeSpacer, CenteredRow } from "./Flex";
 
@@ -19,11 +19,12 @@ const SignupForm: React.FC<IProps> = ({ standAlone }) => {
   const [password, setPassword] = useState("");
   const [displayName, setDisplayName] = useState("");
   const history = useHistory();
+  const location = useLocation();
   const auth = useAuthStore();
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    auth.signup(history, displayName, email, password);
+    auth.signup(history, location, displayName, email, password);
   };
 
   return (

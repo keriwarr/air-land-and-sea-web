@@ -1,77 +1,107 @@
 import firebase from "firebase/app";
-import { observable, action, when } from "mobx";
+import { observable, action, when, computed } from "mobx";
 import { History, Location } from "history";
 import queryString from "query-string";
 
-export type AuthenticatedStore = AuthStore & { user: firebase.User };
-export type UnauthenticatedStore = AuthStore & { user: null };
+export type AuthenticatedAuthStore = AuthStore & { user: firebase.User };
+export type UnauthenticatedAuthStore = AuthStore & { user: null };
 
 export default class AuthStore {
   @observable
-  private user: firebase.User | null = null;
+  private userData: {
+    email: string;
+    displayName: string | null;
+    uid: string;
+    userObject: firebase.User;
+  } | null = null;
 
   constructor() {
     this.initiateFirebaseListener();
   }
 
-  // @computed
-  public readonly isAuthenticated = (): this is AuthenticatedStore => {
-    return this.user !== null;
-  };
+  @computed
+  public get isAuthenticated() {
+    return this.userData !== null && this.userData.displayName !== null;
+  }
 
-  public email(this: AuthenticatedStore): string;
-  public email(this: UnauthenticatedStore): null;
+  public email(this: AuthenticatedAuthStore): string;
+  public email(this: UnauthenticatedAuthStore): null;
+  public email(this: AuthStore): string | null;
   // @computed
   public email(this: AuthStore): string | null {
-    if (this.user && this.user.email === null) {
+    if (this.userData && this.userData.email === null) {
       throw new Error("User does not have an email!!");
     }
-    return this.user && this.user.email;
+    return this.userData && this.userData.email;
   }
 
-  public displayName(this: AuthenticatedStore): string;
-  public displayName(this: UnauthenticatedStore): null;
+  public displayName(this: AuthenticatedAuthStore): string;
+  public displayName(this: UnauthenticatedAuthStore): null;
+  public displayName(this: AuthStore): string | null;
   // @computed
   public displayName(this: AuthStore): string | null {
-    return this.user && (this.user.displayName || "");
+    if (this.userData && this.userData.displayName === null) {
+      throw new Error("User does not have a display name!!");
+    }
+    return this.userData && this.userData.displayName;
   }
 
-  public uid(this: AuthenticatedStore): string;
-  public uid(this: UnauthenticatedStore): null;
+  public uid(this: AuthenticatedAuthStore): string;
+  public uid(this: UnauthenticatedAuthStore): null;
+  public uid(this: AuthStore): string | null;
   // @computed
   public uid(this: AuthStore): string | null {
-    return this.user && this.user.uid;
+    return this.userData && this.userData.uid;
   }
 
   @action
   private readonly setUser = (user: firebase.User | null) => {
-    this.user = user;
+    if (user === null) {
+      this.userData = null;
+      return;
+    }
+    if (user.email === null) {
+      throw new Error("User email must not be null");
+    }
+    this.userData = {
+      displayName: user.displayName,
+      email: user.email,
+      uid: user.uid,
+      userObject: user
+    };
   };
 
-  public setDisplayName(displayName: string) {
-    if (!this.user) {
-      return Promise.resolve();
+  public readonly saveDisplayName = async (displayName: string) => {
+    if (!this.userData) {
+      throw new Error("This must only be called when authenticated");
     }
 
-    return this.user.updateProfile({
+    await this.userData.userObject.updateProfile({
       displayName
     });
-  }
+
+    await this.userData.userObject.reload();
+
+    this.setUser(firebase.auth().currentUser);
+  };
 
   public readonly signup = async (
     history: History,
+    location: Location,
     displayName: string,
     email: string,
     password: string
   ) => {
     try {
       await firebase.auth().createUserWithEmailAndPassword(email, password);
+      await when(() => this.userData !== null);
 
-      await when(() => this.isAuthenticated());
+      await this.saveDisplayName(displayName);
+      await when(() => this.isAuthenticated);
 
-      await this.setDisplayName(displayName);
-
-      history.push("/");
+      if (location.pathname !== "/") {
+        history.push("/");
+      }
     } catch (e) {
       console.error(e);
     }
@@ -86,6 +116,8 @@ export default class AuthStore {
     try {
       await firebase.auth().signInWithEmailAndPassword(email, password);
 
+      await when(() => this.isAuthenticated);
+
       const redirectTo = queryString.parse(location.search)["redirect_to"];
       const nextUrl = Array.isArray(redirectTo)
         ? decodeURIComponent(redirectTo[0])
@@ -93,18 +125,21 @@ export default class AuthStore {
         ? decodeURIComponent(redirectTo)
         : "/";
 
-      history.push(nextUrl);
+      if (nextUrl !== location.pathname) {
+        history.push(nextUrl);
+      }
     } catch (e) {
       console.error(e);
     }
   };
 
-  public readonly logout = async (history: History) => {
+  public readonly logout = async (history: History, location: Location) => {
     try {
       await firebase.auth().signOut();
 
-      // if not already at '/' ?
-      history.push("/");
+      if (location.pathname !== "/") {
+        history.push("/");
+      }
     } catch (e) {
       console.error(e);
     }

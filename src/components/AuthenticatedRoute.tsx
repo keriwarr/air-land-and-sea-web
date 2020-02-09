@@ -9,7 +9,7 @@ const AuthenticatedRoute: React.FC<RouteProps> = ({ children, ...rest }) => {
     <Route
       {...rest}
       render={({ location }) =>
-        auth.isAuthenticated() ? (
+        auth.isAuthenticated ? (
           children
         ) : (
           <Redirect to={`/login?redirect_to=${encodeURIComponent(location.pathname)}`} />
