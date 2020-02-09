@@ -101,8 +101,15 @@ export default class AuthStore {
     await this.saveDisplayName(displayName);
     await when(() => this.isAuthenticated);
 
-    if (`${location.pathname}${location.search}` !== "/") {
-      history.push("/");
+    const redirectTo = queryString.parse(location.search)["redirect_to"];
+    const nextUrl = Array.isArray(redirectTo)
+      ? decodeURIComponent(redirectTo[0])
+      : redirectTo
+      ? decodeURIComponent(redirectTo)
+      : "/";
+
+    if (nextUrl !== `${location.pathname}${location.search}`) {
+      history.push(nextUrl);
     }
   };
 
@@ -126,9 +133,18 @@ export default class AuthStore {
       ? decodeURIComponent(redirectTo)
       : "/";
 
-    if (nextUrl !== location.pathname) {
+    if (nextUrl !== `${location.pathname}${location.search}`) {
       history.push(nextUrl);
     }
+  };
+
+  /**
+   * @throws
+   */
+  public readonly resetPassword = async (
+    email: string,
+  ) => {
+    await firebase.auth().sendPasswordResetEmail(email);
   };
 
   /**

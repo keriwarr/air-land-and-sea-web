@@ -64,6 +64,10 @@ const SignupForm: React.FC<IProps> = ({ standAlone }) => {
 
   return (
     <Form onSubmit={handleSubmit}>
+      <CenteredRow>
+        <h2>Sign up</h2>
+      </CenteredRow>
+      <FixedSizeSpacer flexBasis={15} />
       <label>Display Name</label>
       <input
         type="text"

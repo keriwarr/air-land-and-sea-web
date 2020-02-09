@@ -7,6 +7,7 @@ import styled from "styled-components";
 import Game from "pages/Game";
 import Navbar from "components/Navbar";
 import AuthenticatedRoute from "components/AuthenticatedRoute";
+import ForgotPassword from "pages/ForgotPassword";
 
 const Container = styled.div`
   width: 100vw;
@@ -35,6 +36,9 @@ const App: React.FC = () => (
           </Route>
           <Route path="/login">
             <Login />
+          </Route>
+          <Route path="/forgot">
+            <ForgotPassword />
           </Route>
           <AuthenticatedRoute path="/:gameId">
             <Game />

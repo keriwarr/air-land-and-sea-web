@@ -17,3 +17,13 @@ export const Row = styled.div`
 export const CenteredRow = styled(Row)`
   justify-content: center;
 `;
+
+export const Column = styled.div`
+  display: flex;
+  flex-direction: column;
+`;
+
+export const CenteredColumn = styled(Column)`
+  justify-content: center;
+  text-align: center;
+`;

@@ -26,7 +26,7 @@ interface IProps {
 const UnauthenticatedHome: React.FC<IProps> = ({ auth }) => (
   <Container>
     <Header>Welcome to Air, Land, & Sea ONLINE!</Header>
-    <FixedSizeSpacer flexBasis={80} />
+    <FixedSizeSpacer flexBasis={50} />
     <CenteredRow>
       <FormContainer>
         <LoginForm />

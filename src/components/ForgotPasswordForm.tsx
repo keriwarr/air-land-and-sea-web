@@ -1,9 +1,8 @@
 import React, { useState } from "react";
 import styled from "styled-components";
-import { useHistory, useLocation, Link } from "react-router-dom";
-import { FixedSizeSpacer, CenteredRow } from "components/Flex";
+import { FixedSizeSpacer, CenteredRow, CenteredColumn } from "components/Flex";
 import { useAuthStore } from "utils/useAuthStore";
-import { getLoginErrorText } from "utils/errors";
+import { getPasswordResetErrorText } from "utils/errors";
 
 const Form = styled.form`
   display: flex;
@@ -22,14 +21,11 @@ interface IProps {
   standAlone?: boolean;
 }
 
-const LoginForm: React.FC<IProps> = ({ standAlone }) => {
+const ForgotPasswordForm: React.FC<IProps> = ({ standAlone }) => {
   const [email, setEmail] = useState("");
   const [emailError, setEmailError] = useState(false);
-  const [password, setPassword] = useState("");
-  const [passwordError, setPasswordError] = useState(false);
   const [submissionError, setSubmissionError] = useState<string | null>(null);
-  const history = useHistory();
-  const location = useLocation();
+  const [emailSent, setEmailSent] = useState(false);
   const auth = useAuthStore();
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
@@ -39,27 +35,31 @@ const LoginForm: React.FC<IProps> = ({ standAlone }) => {
 
     if (!email) {
       setEmailError(true);
-    }
-
-    if (!password) {
-      setPasswordError(true);
-    }
-
-    if (!email || !password) {
       return;
     }
 
     try {
-      await auth.login(history, location, email, password);
+      await auth.resetPassword(email);
+      setEmailSent(true);
     } catch (e) {
       setSubmissionError(e.code);
     }
   };
 
+  if (emailSent) {
+    return (
+      <CenteredColumn>
+        <h2>Email sent!</h2>
+        <FixedSizeSpacer flexBasis={20} />
+        <div>Check your inbox.</div>
+      </CenteredColumn>
+    );
+  }
+
   return (
     <Form onSubmit={handleSubmit}>
       <CenteredRow>
-        <h2>Log in</h2>
+        <h2>Password Reset</h2>
       </CenteredRow>
       <FixedSizeSpacer flexBasis={15} />
       <label>Email</label>
@@ -76,33 +76,23 @@ const LoginForm: React.FC<IProps> = ({ standAlone }) => {
         {...(emailError && { className: "error" })}
       />
       <FixedSizeSpacer flexBasis={10} />
-      <label>Password</label>
-      <input
-        type="password"
-        value={password}
-        onChange={e => {
-          setPassword(e.target.value);
-          setPasswordError(false);
-          setSubmissionError(null);
-        }}
-        {...(standAlone && { tabIndex: 2 })}
-        {...(passwordError && { className: "error" })}
-      />
-      <FixedSizeSpacer flexBasis={10} />
       <CenteredRow>
         <input
           type="submit"
           value="Submit"
-          {...(standAlone && { tabIndex: 3 })}
+          {...(standAlone && { tabIndex: 2 })}
         />
       </CenteredRow>
       <FixedSizeSpacer flexBasis={10} />
       <ErrorText>
-        {submissionError ? getLoginErrorText(submissionError) : <>&nbsp;</>}
+        {submissionError ? (
+          getPasswordResetErrorText(submissionError)
+        ) : (
+          <>&nbsp;</>
+        )}
       </ErrorText>
-      <Link to="/forgot">Forgot your Password?</Link>
     </Form>
   );
 };
 
-export default LoginForm;
+export default ForgotPasswordForm;
