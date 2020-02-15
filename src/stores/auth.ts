@@ -113,6 +113,14 @@ export default class AuthStore {
     }
   };
 
+  public readonly getPrefersStaySignedIn = () => {
+    return localStorage['prefersStaySignedIn'] === 'true';
+  }
+
+  public readonly setPrefersStaySignedIn = (staySignedIn: boolean) => {
+    localStorage['prefersStaySignedIn'] = staySignedIn ? 'true' : 'false';
+  }
+
   /**
    * @throws
    */
@@ -120,11 +128,21 @@ export default class AuthStore {
     history: History,
     location: Location,
     email: string,
-    password: string
+    password: string,
+    staySignedIn: boolean
   ) => {
+    console.log(staySignedIn);
+    if (staySignedIn) {
+      await firebase.auth().setPersistence(firebase.auth.Auth.Persistence.LOCAL);
+    } else {
+      await firebase.auth().setPersistence(firebase.auth.Auth.Persistence.SESSION);
+    }
+
     await firebase.auth().signInWithEmailAndPassword(email, password);
 
     await when(() => this.isAuthenticated);
+
+    this.setPrefersStaySignedIn(staySignedIn);
 
     const redirectTo = queryString.parse(location.search)["redirect_to"];
     const nextUrl = Array.isArray(redirectTo)
@@ -141,9 +159,7 @@ export default class AuthStore {
   /**
    * @throws
    */
-  public readonly resetPassword = async (
-    email: string,
-  ) => {
+  public readonly resetPassword = async (email: string) => {
     await firebase.auth().sendPasswordResetEmail(email);
   };
 

@@ -107,7 +107,7 @@ input[type="submit"]:hover {
 }
 
 button:focus,
-input:focus,
+input:not([type='checkbox']):focus,
 select:focus,
 textarea:focus {
   box-shadow: 0 0 0 2px rgba(0, 150, 191, 0.67);
@@ -122,7 +122,6 @@ textarea.error {
 
 button:active,
 input[type="button"]:active,
-input[type="checkbox"]:active,
 input[type="radio"]:active,
 input[type="submit"]:active {
   transform: translateY(2px);

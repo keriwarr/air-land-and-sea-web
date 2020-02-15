@@ -18,19 +18,29 @@ const ErrorText = styled.div`
   text-align: center;
 `;
 
+const Checkbox = styled.input`
+  margin: 4px;
+`;
+
+const CheckboxLabel = styled.label`
+  cursor: pointer;
+  user-select: none;
+`;
+
 interface IProps {
   standAlone?: boolean;
 }
 
 const LoginForm: React.FC<IProps> = ({ standAlone }) => {
+  const history = useHistory();
+  const location = useLocation();
+  const auth = useAuthStore();
   const [email, setEmail] = useState("");
   const [emailError, setEmailError] = useState(false);
   const [password, setPassword] = useState("");
   const [passwordError, setPasswordError] = useState(false);
   const [submissionError, setSubmissionError] = useState<string | null>(null);
-  const history = useHistory();
-  const location = useLocation();
-  const auth = useAuthStore();
+  const [staySignedIn, setStaySignedIn] = useState(auth.getPrefersStaySignedIn());
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -50,7 +60,7 @@ const LoginForm: React.FC<IProps> = ({ standAlone }) => {
     }
 
     try {
-      await auth.login(history, location, email, password);
+      await auth.login(history, location, email, password, staySignedIn);
     } catch (e) {
       setSubmissionError(e.code);
     }
@@ -95,6 +105,18 @@ const LoginForm: React.FC<IProps> = ({ standAlone }) => {
           value="Submit"
           {...(standAlone && { tabIndex: 3 })}
         />
+      </CenteredRow>
+      <FixedSizeSpacer flexBasis={10} />
+      <CenteredRow>
+        <Checkbox
+          type="checkbox"
+          checked={staySignedIn}
+          id="staySignedIn"
+          onChange={e => {
+            setStaySignedIn(e.target.checked);
+          }}
+        />
+        <CheckboxLabel htmlFor="staySignedIn"> Stay Signed In?</CheckboxLabel>
       </CenteredRow>
       <FixedSizeSpacer flexBasis={10} />
       <ErrorText>
