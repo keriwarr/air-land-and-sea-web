@@ -15,6 +15,9 @@ export default class AuthStore {
     userObject: firebase.User;
   } | null = null;
 
+  @observable
+  private firebaseAuthStateKnown = false;
+
   constructor() {
     this.initiateFirebaseListener();
   }
@@ -95,6 +98,9 @@ export default class AuthStore {
     email: string,
     password: string
   ) => {
+    await firebase
+      .auth()
+      .setPersistence(firebase.auth.Auth.Persistence.SESSION);
     await firebase.auth().createUserWithEmailAndPassword(email, password);
     await when(() => this.userData !== null);
 
@@ -114,12 +120,33 @@ export default class AuthStore {
   };
 
   public readonly getPrefersStaySignedIn = () => {
-    return localStorage['prefersStaySignedIn'] === 'true';
-  }
+    return localStorage["prefersStaySignedIn"] === "true";
+  };
 
   public readonly setPrefersStaySignedIn = (staySignedIn: boolean) => {
-    localStorage['prefersStaySignedIn'] = staySignedIn ? 'true' : 'false';
+    if (staySignedIn) {
+      localStorage["prefersStaySignedIn"] = "true";
+    } else {
+      delete localStorage["prefersStaySignedIn"];
+    }
+  };
+
+  @computed
+  public get isProbablyLoggedIn() {
+    return (
+      !this.firebaseAuthStateKnown && localStorage["wasPreviouslyAuthenticated"]
+    );
   }
+
+  private readonly setWasPreviouslyAuthenticated = (
+    previouslyAuthenticated: boolean
+  ) => {
+    if (previouslyAuthenticated) {
+      localStorage["wasPreviouslyAuthenticated"] = "true";
+    } else {
+      delete localStorage["wasPreviouslyAuthenticated"];
+    }
+  };
 
   /**
    * @throws
@@ -133,9 +160,13 @@ export default class AuthStore {
   ) => {
     console.log(staySignedIn);
     if (staySignedIn) {
-      await firebase.auth().setPersistence(firebase.auth.Auth.Persistence.LOCAL);
+      await firebase
+        .auth()
+        .setPersistence(firebase.auth.Auth.Persistence.LOCAL);
     } else {
-      await firebase.auth().setPersistence(firebase.auth.Auth.Persistence.SESSION);
+      await firebase
+        .auth()
+        .setPersistence(firebase.auth.Auth.Persistence.SESSION);
     }
 
     await firebase.auth().signInWithEmailAndPassword(email, password);
@@ -143,6 +174,7 @@ export default class AuthStore {
     await when(() => this.isAuthenticated);
 
     this.setPrefersStaySignedIn(staySignedIn);
+    this.setWasPreviouslyAuthenticated(staySignedIn);
 
     const redirectTo = queryString.parse(location.search)["redirect_to"];
     const nextUrl = Array.isArray(redirectTo)
@@ -169,12 +201,17 @@ export default class AuthStore {
   public readonly logout = async (history: History, location: Location) => {
     await firebase.auth().signOut();
 
+    this.setWasPreviouslyAuthenticated(false);
+
     if (`${location.pathname}${location.search}` !== "/") {
       history.push("/");
     }
   };
 
   private readonly initiateFirebaseListener = () => {
-    firebase.auth().onAuthStateChanged(this.setUser);
+    firebase.auth().onAuthStateChanged(user => {
+      this.setUser(user);
+      this.firebaseAuthStateKnown = true;
+    });
   };
 }
