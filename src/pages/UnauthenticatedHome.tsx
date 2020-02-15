@@ -7,7 +7,7 @@ import SignupForm from "components/SignupForm";
 import FormContainer from "components/FormContainer";
 
 const Container = styled.div`
-  flex-grow: 1;
+  height: 100%;
 
   display: flex;
   flex-direction: column;

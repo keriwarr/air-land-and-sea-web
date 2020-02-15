@@ -4,7 +4,7 @@ import { CenteredRow } from "components/Flex";
 import ForgotPasswordForm from "components/ForgotPasswordForm";
 
 const Container = styled.div`
-  flex-grow: 1;
+  height: 100%;
 
   display: flex;
   flex-direction: column;

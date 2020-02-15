@@ -10,6 +10,7 @@ import { GrowingSpacer, FixedSizeSpacer } from "components/Flex";
 const Container = styled.div`
   width: 100vw;
   height: 60px;
+  flex-shrink: 0;
   background-color: #cfcfcf;
 
   display: flex;

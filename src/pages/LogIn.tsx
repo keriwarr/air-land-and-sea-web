@@ -5,7 +5,7 @@ import { CenteredRow, CenteredColumn, FixedSizeSpacer } from "components/Flex";
 import { Link, useLocation } from "react-router-dom";
 
 const Container = styled.div`
-  flex-grow: 1;
+  height: 100%;
 
   display: flex;
   flex-direction: column;

@@ -7,7 +7,7 @@ import { FixedSizeSpacer, CenteredRow } from "components/Flex";
 import { getHomeErrorText } from "utils/errors";
 
 const Container = styled.div`
-  flex-grow: 1;
+  height: 100%;
 
   display: flex;
   flex-direction: column;
