@@ -1,17 +1,17 @@
 import React from "react";
 import { UnauthenticatedAuthStore } from "stores/auth";
 import styled from "styled-components";
-import { FixedSizeSpacer, CenteredRow } from "components/Flex";
+import { FixedSizeSpacer, CenteredRow, GrowingSpacer } from "components/Flex";
 import LoginForm from "components/LoginForm";
 import SignupForm from "components/SignupForm";
 import FormContainer from "components/FormContainer";
+import { Link } from "react-router-dom";
 
 const Container = styled.div`
   height: 100%;
 
   display: flex;
   flex-direction: column;
-  justify-content: center;
   text-align: center;
 `;
 
@@ -25,6 +25,7 @@ interface IProps {
 
 const UnauthenticatedHome: React.FC<IProps> = ({ auth }) => (
   <Container>
+    <GrowingSpacer />
     <Header>Welcome to Air, Land, & Sea ONLINE!</Header>
     <FixedSizeSpacer flexBasis={50} />
     <CenteredRow>
@@ -36,6 +37,15 @@ const UnauthenticatedHome: React.FC<IProps> = ({ auth }) => (
         <SignupForm />
       </FormContainer>
     </CenteredRow>
+    <GrowingSpacer />
+    <CenteredRow>
+      <Link to="/tos">Terms and Conditions</Link>
+      <FixedSizeSpacer flexBasis={10} />
+      |
+      <FixedSizeSpacer flexBasis={10} />
+      <Link to="/privacy">Privacy Policy</Link>
+    </CenteredRow>
+    <FixedSizeSpacer flexBasis={10} />
   </Container>
 );
 

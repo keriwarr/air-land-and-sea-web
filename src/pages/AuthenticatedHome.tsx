@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from "react";
 import { AuthenticatedAuthStore } from "stores/auth";
 import queryString from "query-string";
-import { useLocation } from "react-router-dom";
+import { useLocation, Link } from "react-router-dom";
 import styled from "styled-components";
-import { FixedSizeSpacer, CenteredRow } from "components/Flex";
+import { FixedSizeSpacer, CenteredRow, GrowingSpacer } from "components/Flex";
 import { getHomeErrorText } from "utils/errors";
 
 const Container = styled.div`
@@ -53,6 +53,15 @@ const AuthenticatedHome: React.FC<IProps> = ({ auth }) => {
       <CenteredRow>
         <h3>Hey there, {auth.displayName()}.</h3>
       </CenteredRow>
+      <GrowingSpacer />
+      <CenteredRow>
+        <Link to="/tos">Terms and Conditions</Link>
+        <FixedSizeSpacer flexBasis={10} />
+        |
+        <FixedSizeSpacer flexBasis={10} />
+        <Link to="/privacy">Privacy Policy</Link>
+      </CenteredRow>
+      <FixedSizeSpacer flexBasis={10} />
     </Container>
   );
 };
