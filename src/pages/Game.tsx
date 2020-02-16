@@ -164,30 +164,32 @@ const Game: React.FC = observer(() => {
           } = JSON.parse(roundStateString);
           const { deck, moves } = roundStateObj;
 
+          let currentRoundState = roundState;
+
           if (!deckIsSet) {
-            setRoundState(
-              new RoundState(
-                [THEATER.AIR, THEATER.LAND, THEATER.SEA],
-                {},
-                new Deck(
-                  deck.map(({ cardTypeKey, theater, name, id }) => ({
-                    cardTypeKey,
-                    theater,
-                    name,
-                    id
-                  })),
-                  false
-                )
+            const newRoundState = new RoundState(
+              [THEATER.AIR, THEATER.LAND, THEATER.SEA],
+              {},
+              new Deck(
+                deck.map(({ cardTypeKey, theater, name, id }) => ({
+                  cardTypeKey,
+                  theater,
+                  name,
+                  id
+                })),
+                false
               )
             );
+            currentRoundState = newRoundState;
+            setRoundState(newRoundState);
             setDeckIsSet(true);
           }
-          if (moves.length > roundState.numMoves) {
+          if (moves.length > currentRoundState.numMoves) {
             moves
-              .slice(roundState.numMoves)
+              .slice(currentRoundState.numMoves)
               .filter(isNotNull)
               .forEach(move => {
-                roundState.playMove(move);
+                currentRoundState.playMove(move);
               });
           }
         } catch (e) {
@@ -198,9 +200,7 @@ const Game: React.FC = observer(() => {
   );
 
   useEffect(() => {
-    console.log('registering effect');
     return gameDocRef.onSnapshot(doc => {
-      console.log('effict fired');
       gameStore.setFromFirebase(doc.data() || {});
     });
   }, [gameDocRef, gameId, gameStore]);
