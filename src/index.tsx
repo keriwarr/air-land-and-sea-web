@@ -5,6 +5,7 @@ import * as serviceWorker from "./serviceWorker";
 import * as firebase from "firebase/app";
 import "firebase/auth";
 import "firebase/firestore";
+import "firebase/database";
 import { createContext } from "react";
 import AuthStore from "./stores/auth";
 

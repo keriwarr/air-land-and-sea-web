@@ -3,17 +3,19 @@ import { observable, action, when, computed } from "mobx";
 import { History, Location } from "history";
 import queryString from "query-string";
 
-export type AuthenticatedAuthStore = AuthStore & { user: firebase.User };
+interface UserData {
+  email: string;
+  displayName: string | null;
+  uid: string;
+  userObject: firebase.User;
+}
+
+export type AuthenticatedAuthStore = AuthStore & { user: UserData };
 export type UnauthenticatedAuthStore = AuthStore & { user: null };
 
 export default class AuthStore {
   @observable
-  private userData: {
-    email: string;
-    displayName: string | null;
-    uid: string;
-    userObject: firebase.User;
-  } | null = null;
+  private userData: UserData | null = null;
 
   @observable
   private firebaseAuthStateKnown = false;
@@ -158,7 +160,6 @@ export default class AuthStore {
     password: string,
     staySignedIn: boolean
   ) => {
-    console.log(staySignedIn);
     if (staySignedIn) {
       await firebase
         .auth()
@@ -199,6 +200,7 @@ export default class AuthStore {
    * @throws
    */
   public readonly logout = async (history: History, location: Location) => {
+    await this.teardownPresence();
     await firebase.auth().signOut();
 
     this.setWasPreviouslyAuthenticated(false);
@@ -209,9 +211,50 @@ export default class AuthStore {
   };
 
   private readonly initiateFirebaseListener = () => {
-    firebase.auth().onAuthStateChanged(user => {
+    firebase.auth().onAuthStateChanged(async user => {
       this.setUser(user);
       this.firebaseAuthStateKnown = true;
+
+      if (user) {
+        this.setupPresence();
+      }
     });
+  };
+
+  private readonly setupPresence = () => {
+    firebase
+      .database()
+      .ref(".info/connected")
+      .on("value", async snapshot => {
+        if (snapshot.val() === false) {
+          return;
+        }
+
+        var userNameOnlineRef = firebase
+          .database()
+          .ref("/users-online/" + this.uid());
+
+        try {
+          await userNameOnlineRef.onDisconnect().set(null);
+          await userNameOnlineRef.set({
+            id: this.uid(),
+            displayName: this.displayName()
+          });
+        } catch (e) {
+          console.error(e);
+        }
+      });
+  };
+
+  private readonly teardownPresence = async () => {
+    var userNameOnlineRef = firebase
+      .database()
+      .ref("/users-online/" + this.uid());
+
+    try {
+      await userNameOnlineRef.set(null);
+    } catch (e) {
+      console.error(e);
+    }
   };
 }

@@ -5,6 +5,7 @@ import { useLocation, Link } from "react-router-dom";
 import styled from "styled-components";
 import { FixedSizeSpacer, CenteredRow, GrowingSpacer } from "components/Flex";
 import { getHomeErrorText } from "utils/errors";
+import UsersOnlineWidget from "components/UsersOnlineWidget";
 
 const Container = styled.div`
   height: 100%;
@@ -52,6 +53,10 @@ const AuthenticatedHome: React.FC<IProps> = ({ auth }) => {
       </FixedSizeSpacer>
       <CenteredRow>
         <h3>Hey there, {auth.displayName()}.</h3>
+      </CenteredRow>
+      <FixedSizeSpacer flexBasis={20} />
+      <CenteredRow>
+        <UsersOnlineWidget />
       </CenteredRow>
       <GrowingSpacer />
       <CenteredRow>
