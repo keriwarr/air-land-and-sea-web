@@ -198,7 +198,9 @@ const Game: React.FC = observer(() => {
   );
 
   useEffect(() => {
+    console.log('registering effect');
     return gameDocRef.onSnapshot(doc => {
+      console.log('effict fired');
       gameStore.setFromFirebase(doc.data() || {});
     });
   }, [gameDocRef, gameId, gameStore]);

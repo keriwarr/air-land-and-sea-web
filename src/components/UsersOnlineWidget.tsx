@@ -13,7 +13,6 @@ const UsersOnlineWidget: React.FC = () => {
         .firestore()
         .collection("users-online")
         .onSnapshot(querySnapshot => {
-          console.log(uid, querySnapshot.docs);
           setOnlineUsers(
             querySnapshot.docs
               .map(doc => doc.data())

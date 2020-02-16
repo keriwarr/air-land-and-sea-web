@@ -1,5 +1,5 @@
 import firebase from "firebase/app";
-import { observable, action, when, computed } from "mobx";
+import { observable, action, when, computed, autorun, runInAction } from "mobx";
 import { History, Location } from "history";
 import queryString from "query-string";
 
@@ -22,11 +22,22 @@ export default class AuthStore {
 
   constructor() {
     this.initiateFirebaseListener();
+
+    autorun(() => {
+      if (this.isAuthenticated) {
+        this.setupPresence();
+      }
+    });
   }
 
   @computed
   public get isAuthenticated() {
     return this.userData !== null && this.userData.displayName !== null;
+  }
+
+  @computed
+  public get isAuthenticating() {
+    return !this.firebaseAuthStateKnown;
   }
 
   public email(this: AuthenticatedAuthStore): string;
@@ -45,9 +56,6 @@ export default class AuthStore {
   public displayName(this: AuthStore): string | null;
   // @computed
   public displayName(this: AuthStore): string | null {
-    if (this.userData && this.userData.displayName === null) {
-      throw new Error("User does not have a display name!!");
-    }
     return this.userData && this.userData.displayName;
   }
 
@@ -212,12 +220,10 @@ export default class AuthStore {
 
   private readonly initiateFirebaseListener = () => {
     firebase.auth().onAuthStateChanged(async user => {
-      this.setUser(user);
-      this.firebaseAuthStateKnown = true;
-
-      if (user) {
-        this.setupPresence();
-      }
+      runInAction(() => {
+        this.setUser(user);
+        this.firebaseAuthStateKnown = true;
+      });
     });
   };
 
