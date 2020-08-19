@@ -1,7 +1,7 @@
 import React from "react";
 import { BrowserRouter as Router, Switch, Route } from "react-router-dom";
 import Home from "pages/Home";
-import SignUp from "pages/Signup";
+import SignUp from "pages/SignUp";
 import Login from "pages/Login";
 import styled from "styled-components";
 import Game from "pages/Game";
